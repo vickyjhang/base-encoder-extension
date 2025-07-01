@@ -1,0 +1,271 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f9f9f9;
+    min-width: 350px;
+}
+
+.container {
+    padding: 20px;
+}
+
+h1 {
+    font-size: 20px;
+    margin-bottom: 15px;
+    color: #333;
+    text-align: center;
+}
+
+h2 {
+    font-size: 16px;
+    margin: 15px 0 8px 0;
+    color: #555;
+}
+
+.mode-selection {
+    margin-bottom: 15px;
+    text-align: center;
+    background: white;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+}
+
+.mode-selection label {
+    display: inline-block;
+    margin: 0 15px;
+    font-weight: normal;
+    cursor: pointer;
+}
+
+.mode-selection input[type="radio"] {
+    margin-right: 5px;
+}
+
+.format-selection {
+    margin-bottom: 15px;
+    background: white;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+}
+
+.format-selection label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #555;
+}
+
+select {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+textarea {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+    resize: vertical;
+    box-sizing: border-box;
+}
+
+#input {
+    min-height: 60px;
+}
+
+#output {
+    min-height: 60px;
+    background-color: #f8f8f8;
+}
+
+.action-button {
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+button {
+    background-color: #007cba;
+    color: white;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    min-width: 120px;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #005a87;
+}
+
+button:active {
+    transform: translateY(1px);
+}
+
+.error {
+    color: #e74c3c;
+    background-color: #fdf2f2;
+}
+
+.success {
+    color: #27ae60;
+    background-color: #f2fdf2;
+}
+
+.custom-base-input {
+    margin-bottom: 15px;
+    background: white;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+}
+
+.custom-base-input label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #555;
+}
+
+.custom-base-input input[type="number"] {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+/* 標籤頁樣式 */
+.tab-container {
+    display: flex;
+    margin-bottom: 20px;
+    background: white;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    overflow: hidden;
+}
+
+.tab-button {
+    flex: 1;
+    padding: 12px 16px;
+    background: #f8f9fa;
+    color: #666;
+    border: none;
+    border-right: 1px solid #ddd;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: normal;
+    transition: all 0.3s;
+    min-width: auto;
+}
+
+.tab-button:last-child {
+    border-right: none;
+}
+
+.tab-button.active {
+    background: #007cba;
+    color: white;
+}
+
+.tab-button:hover:not(.active) {
+    background: #e9ecef;
+}
+
+/* 標籤內容樣式 */
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+/* 進制轉換區塊樣式 */
+.convert-input-group {
+    background: white;
+    padding: 15px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    margin-bottom: 15px;
+}
+
+.base-input-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.base-input-half {
+    flex: 1;
+}
+
+.base-input-half label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #555;
+    font-size: 13px;
+}
+
+.base-input-half input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+.convert-input-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #555;
+}
+
+.secondary {
+    background-color: #6c757d;
+    margin-left: 10px;
+}
+
+.secondary:hover {
+    background-color: #545b62;
+}
+
+.base-reference {
+    margin-top: 10px;
+    padding: 10px;
+    background: #f8f9fa;
+    border-radius: 4px;
+    border: 1px solid #e9ecef;
+}
+
+.base-reference small {
+    color: #666;
+    line-height: 1.4;
+}
+
+/* 響應式調整 */
+@media (max-width: 400px) {
+    .base-input-row {
+        flex-direction: column;
+        gap: 5px;
+    }
+    
+    .secondary {
+        margin-left: 0;
+        margin-top: 10px;
+    }
+}

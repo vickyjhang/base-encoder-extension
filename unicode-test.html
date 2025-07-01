@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <title>Unicode Base64 測試</title>
+</head>
+<body>
+    <h1>Unicode Base64 編碼測試</h1>
+    
+    <div>
+        <label>輸入文字：</label>
+        <input type="text" id="testInput" value="你好" style="width: 200px; padding: 5px;">
+        <button onclick="testEncode()">測試編碼</button>
+        <button onclick="testDecode()">測試解碼</button>
+    </div>
+    
+    <div style="margin-top: 20px;">
+        <h3>結果：</h3>
+        <div id="results" style="background: #f0f0f0; padding: 10px; border-radius: 4px; min-height: 50px;"></div>
+    </div>
+
+    <div style="margin-top: 20px;">
+        <h3>測試案例：</h3>
+        <button onclick="runAllTests()">執行所有測試</button>
+        <div id="testResults" style="margin-top: 10px;"></div>
+    </div>
+
+    <script src="src/utils/encoders.js"></script>
+    <script>
+        function testEncode() {
+            const input = document.getElementById('testInput').value;
+            const resultsDiv = document.getElementById('results');
+            
+            try {
+                const base64Result = base64Encode(input);
+                const base58Result = base58Encode(input);
+                
+                resultsDiv.innerHTML = `
+                    <p><strong>輸入:</strong> "${input}"</p>
+                    <p><strong>Base64:</strong> ${base64Result}</p>
+                    <p><strong>Base58:</strong> ${base58Result}</p>
+                `;
+            } catch (error) {
+                resultsDiv.innerHTML = `<p style="color: red;">編碼錯誤: ${error.message}</p>`;
+            }
+        }
+        
+        function testDecode() {
+            const input = document.getElementById('testInput').value;
+            const resultsDiv = document.getElementById('results');
+            
+            try {
+                // 假設輸入是 Base64 編碼
+                const decoded = base64Decode(input);
+                resultsDiv.innerHTML = `
+                    <p><strong>Base64 解碼結果:</strong> "${decoded}"</p>
+                `;
+            } catch (error) {
+                resultsDiv.innerHTML = `<p style="color: red;">解碼錯誤: ${error.message}</p>`;
+            }
+        }
+        
+        function runAllTests() {
+            const testCases = [
+                'Hello World',
+                '你好',
+                '測試',
+                'Hello 世界',
+                '🚀 Emoji 測試',
+                'àáâãäå',
+                '123456789'
+            ];
+            
+            const resultsDiv = document.getElementById('testResults');
+            let html = '<h4>測試結果:</h4>';
+            
+            testCases.forEach((testCase, index) => {
+                try {
+                    // 編碼
+                    const encoded = base64Encode(testCase);
+                    // 解碼驗證
+                    const decoded = base64Decode(encoded);
+                    const isCorrect = decoded === testCase;
+                    
+                    html += `
+                        <div style="margin: 10px 0; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+                            <p><strong>測試 ${index + 1}:</strong> "${testCase}"</p>
+                            <p><strong>編碼:</strong> ${encoded}</p>
+                            <p><strong>解碼:</strong> "${decoded}"</p>
+                            <p><strong>結果:</strong> <span style="color: ${isCorrect ? 'green' : 'red'}">${isCorrect ? '✅ 通過' : '❌ 失敗'}</span></p>
+                        </div>
+                    `;
+                } catch (error) {
+                    html += `
+                        <div style="margin: 10px 0; padding: 10px; border: 1px solid #red; border-radius: 4px;">
+                            <p><strong>測試 ${index + 1}:</strong> "${testCase}"</p>
+                            <p style="color: red;"><strong>錯誤:</strong> ${error.message}</p>
+                        </div>
+                    `;
+                }
+            });
+            
+            resultsDiv.innerHTML = html;
+        }
+        
+        // 自動執行初始測試
+        window.onload = function() {
+            testEncode();
+        };
+    </script>
+</body>
+</html>

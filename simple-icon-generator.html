@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Base Encoder 圖示生成器</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f7;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #1d1d1f;
+            margin-bottom: 30px;
+        }
+        
+        .icon-preview {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+        
+        .icon-item {
+            text-align: center;
+        }
+        
+        .icon-canvas {
+            border: 2px solid #e5e5e7;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            display: block;
+        }
+        
+        .icon-label {
+            font-size: 14px;
+            color: #6e6e73;
+            font-weight: 500;
+        }
+        
+        .download-section {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 1px solid #e5e5e7;
+        }
+        
+        .download-btn {
+            background: #007aff;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            margin: 5px;
+            transition: background 0.2s;
+        }
+        
+        .download-btn:hover {
+            background: #0056cc;
+        }
+        
+        .download-btn:active {
+            background: #004999;
+        }
+        
+        .instructions {
+            background: #f9f9fb;
+            border: 1px solid #e5e5e7;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .instructions h3 {
+            margin-top: 0;
+            color: #1d1d1f;
+        }
+        
+        .instructions ol {
+            color: #424245;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 Base Encoder 圖示生成器</h1>
+        
+        <div class="icon-preview">
+            <div class="icon-item">
+                <canvas id="icon16" class="icon-canvas" width="16" height="16"></canvas>
+                <div class="icon-label">16×16</div>
+            </div>
+            
+            <div class="icon-item">
+                <canvas id="icon48" class="icon-canvas" width="48" height="48"></canvas>
+                <div class="icon-label">48×48</div>
+            </div>
+            
+            <div class="icon-item">
+                <canvas id="icon128" class="icon-canvas" width="128" height="128"></canvas>
+                <div class="icon-label">128×128</div>
+            </div>
+        </div>
+        
+        <div class="download-section">
+            <button class="download-btn" onclick="downloadIcon('icon16', 'icon16.png')">
+                下載 16×16 圖示
+            </button>
+            <button class="download-btn" onclick="downloadIcon('icon48', 'icon48.png')">
+                下載 48×48 圖示
+            </button>
+            <button class="download-btn" onclick="downloadIcon('icon128', 'icon128.png')">
+                下載 128×128 圖示
+            </button>
+        </div>
+        
+        <div class="download-section">
+            <button class="download-btn" onclick="downloadAllIcons()" style="background: #34c759;">
+                📦 下載所有圖示
+            </button>
+        </div>
+        
+        <div class="instructions">
+            <h3>📋 使用說明</h3>
+            <ol>
+                <li>點擊「下載所有圖示」按鈕一次下載全部</li>
+                <li>或分別點擊單個圖示的下載按鈕</li>
+                <li>將下載的檔案複製到 <code>icons/</code> 目錄</li>
+                <li>替換現有的圖示檔案</li>
+                <li>重新執行 <code>./quick-test.sh</code> 驗證</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        // 繪製圖示的函數
+        function drawIcon(canvas, size) {
+            const ctx = canvas.getContext('2d');
+            const ratio = size / 128; // 基於 128px 的比例
+            
+            // 清空畫布
+            ctx.clearRect(0, 0, size, size);
+            
+            // 設定背景 - 漸變色
+            const gradient = ctx.createLinearGradient(0, 0, size, size);
+            gradient.addColorStop(0, '#4285f4');
+            gradient.addColorStop(1, '#34a853');
+            
+            // 繪製圓角矩形背景
+            const cornerRadius = size * 0.2;
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.roundRect(0, 0, size, size, cornerRadius);
+            ctx.fill();
+            
+            // 繪製主要圖案 - 編碼符號
+            ctx.fillStyle = 'white';
+            ctx.font = `bold ${size * 0.5}px -apple-system, BlinkMacSystemFont, sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            
+            // 繪製 "<>" 符號
+            const centerX = size / 2;
+            const centerY = size / 2;
+            
+            if (size >= 48) {
+                // 大圖示顯示 "<>"
+                ctx.fillText('<>', centerX, centerY);
+            } else {
+                // 小圖示顯示 "<"
+                ctx.fillText('<', centerX, centerY);
+            }
+            
+            // 添加小裝飾點
+            if (size >= 48) {
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+                const dotSize = size * 0.06;
+                
+                // 四個角落的小點
+                ctx.beginPath();
+                ctx.arc(size * 0.15, size * 0.15, dotSize, 0, Math.PI * 2);
+                ctx.arc(size * 0.85, size * 0.15, dotSize, 0, Math.PI * 2);
+                ctx.arc(size * 0.15, size * 0.85, dotSize, 0, Math.PI * 2);
+                ctx.arc(size * 0.85, size * 0.85, dotSize, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+        
+        // 下載圖示的函數
+        function downloadIcon(canvasId, filename) {
+            const canvas = document.getElementById(canvasId);
+            const link = document.createElement('a');
+            link.download = filename;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+        
+        // 下載所有圖示
+        async function downloadAllIcons() {
+            const btn = event.target;
+            const originalText = btn.textContent;
+            btn.textContent = '⏳ 正在生成...';
+            btn.disabled = true;
+            
+            try {
+                // 依序下載
+                await new Promise(resolve => setTimeout(resolve, 100));
+                downloadIcon('icon16', 'icon16.png');
+                
+                await new Promise(resolve => setTimeout(resolve, 300));
+                downloadIcon('icon48', 'icon48.png');
+                
+                await new Promise(resolve => setTimeout(resolve, 300));
+                downloadIcon('icon128', 'icon128.png');
+                
+                btn.textContent = '✅ 下載完成！';
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.disabled = false;
+                }, 2000);
+                
+            } catch (error) {
+                console.error('下載失敗:', error);
+                btn.textContent = '❌ 下載失敗';
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.disabled = false;
+                }, 2000);
+            }
+        }
+        
+        // 支援圓角矩形（為舊瀏覽器）
+        if (!CanvasRenderingContext2D.prototype.roundRect) {
+            CanvasRenderingContext2D.prototype.roundRect = function(x, y, width, height, radius) {
+                this.beginPath();
+                this.moveTo(x + radius, y);
+                this.lineTo(x + width - radius, y);
+                this.quadraticCurveTo(x + width, y, x + width, y + radius);
+                this.lineTo(x + width, y + height - radius);
+                this.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+                this.lineTo(x + radius, y + height);
+                this.quadraticCurveTo(x, y + height, x, y + height - radius);
+                this.lineTo(x, y + radius);
+                this.quadraticCurveTo(x, y, x + radius, y);
+                this.closePath();
+            };
+        }
+        
+        // 頁面載入時繪製所有圖示
+        document.addEventListener('DOMContentLoaded', function() {
+            drawIcon(document.getElementById('icon16'), 16);
+            drawIcon(document.getElementById('icon48'), 48);
+            drawIcon(document.getElementById('icon128'), 128);
+        });
+    </script>
+</body>
+</html>

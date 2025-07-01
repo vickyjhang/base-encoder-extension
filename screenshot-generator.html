@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Base Encoder - 螢幕截圖生成器</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f0f2f5;
+        }
+        .screenshot-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 40px;
+            max-width: 1320px;
+            margin: 0 auto;
+        }
+        .screenshot-item {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            overflow: hidden;
+            width: 1280px;
+            height: 800px;
+            margin: 0 auto;
+            position: relative;
+        }
+        .screenshot-header {
+            background: linear-gradient(135deg, #4285f4, #34a853);
+            color: white;
+            padding: 30px 40px;
+            font-weight: 600;
+            font-size: 24px;
+            text-align: center;
+            height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .screenshot-content {
+            display: flex;
+            height: 680px;
+            padding: 40px;
+            gap: 40px;
+        }
+        .popup-mockup {
+            width: 400px;
+            height: 600px;
+            border: 3px solid #e0e0e0;
+            border-radius: 12px;
+            background: white;
+            box-shadow: 0 12px 35px rgba(0,0,0,0.15);
+            overflow: hidden;
+        }
+        .popup-header {
+            background: linear-gradient(135deg, #4285f4, #34a853);
+            color: white;
+            padding: 16px 20px;
+            font-size: 18px;
+            font-weight: 600;
+            height: 56px;
+            display: flex;
+            align-items: center;
+        }
+        .popup-tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 2px solid #dee2e6;
+            height: 50px;
+        }
+        .tab {
+            flex: 1;
+            padding: 14px;
+            text-align: center;
+            cursor: pointer;
+            font-size: 14px;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .tab.active {
+            background: white;
+            border-bottom-color: #4285f4;
+            color: #4285f4;
+            font-weight: 600;
+        }
+        .popup-content {
+            padding: 24px;
+            height: 494px;
+            overflow: hidden;
+        }
+        .form-group {
+            margin-bottom: 16px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: #495057;
+            font-size: 13px;
+        }
+        .form-control {
+            width: 100%;
+            padding: 10px 14px;
+            border: 2px solid #ced4da;
+            border-radius: 6px;
+            font-size: 13px;
+            box-sizing: border-box;
+        }
+        .form-control:focus {
+            border-color: #4285f4;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.1);
+        }
+        textarea.form-control {
+            height: 60px;
+            resize: none;
+            overflow: hidden;
+        }
+        .btn {
+            background: #4285f4;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            width: 100%;
+            margin: 8px 0;
+        }
+        .btn:hover {
+            background: #3367d6;
+        }
+        .result-box {
+            background: #f8f9fa;
+            border: 2px solid #dee2e6;
+            border-radius: 6px;
+            padding: 10px 14px;
+            margin-top: 8px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 11px;
+            height: 40px;
+            word-break: break-all;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+        }
+        .features-panel {
+            flex: 1;
+            padding: 20px;
+        }
+        .features-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .feature-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 18px;
+            padding: 16px 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #4285f4;
+        }
+        .feature-icon {
+            font-size: 28px;
+            margin-right: 20px;
+            width: 50px;
+            text-align: center;
+        }
+        .feature-text {
+            flex: 1;
+        }
+        .feature-title {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 6px;
+            font-size: 16px;
+        }
+        .feature-desc {
+            font-size: 13px;
+            color: #6c757d;
+            line-height: 1.4;
+        }
+        .download-controls {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+        }
+        .download-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            margin: 5px;
+        }
+        .download-btn:hover {
+            background: #218838;
+        }
+        .download-btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+        .download-btn.jpeg {
+            background: #fd7e14;
+        }
+        .download-btn.jpeg:hover {
+            background: #e55a00;
+        }
+        .conversion-example {
+            background: #fff3cd;
+            border: 2px solid #ffeaa7;
+            border-radius: 6px;
+            padding: 10px;
+            margin: 10px 0;
+            font-size: 12px;
+            text-align: center;
+        }
+        .conversion-arrow {
+            margin: 3px 0;
+            color: #4285f4;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1 style="text-align: center; color: #2c3e50; margin-bottom: 40px;">
+        📸 Base Encoder - Chrome 商店螢幕截圖
+    </h1>
+
+    <div class="screenshot-container">
+        <!-- 螢幕截圖 1: 編碼/解碼功能 -->
+        <div class="screenshot-item" id="screenshot1">
+            <div class="screenshot-header">
+                🔐 Base Encoder - 編碼解碼功能
+            </div>
+            <div class="screenshot-content">
+                <div class="popup-mockup">
+                    <div class="popup-header">
+                        🔐 Base Encoder
+                    </div>
+                    <div class="popup-tabs">
+                        <div class="tab active">編碼/解碼</div>
+                        <div class="tab">進制轉換</div>
+                    </div>
+                    <div class="popup-content">
+                        <div class="form-group">
+                            <label>編碼類型</label>
+                            <select class="form-control">
+                                <option>Base64</option>
+                                <option>Base58</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>輸入文字</label>
+                            <textarea class="form-control">Hello World! 測試 🚀</textarea>
+                        </div>
+                        <button class="btn">🔗 編碼</button>
+                        <div class="form-group">
+                            <label>編碼結果</label>
+                            <div class="result-box">SGVsbG8gV29ybGQhIOa4rOippSA=</div>
+                        </div>
+                        <button class="btn" style="background: #fd7e14;">🔓 解碼</button>
+                        <div class="form-group">
+                            <label>解碼結果</label>
+                            <div class="result-box">Hello World! 測試 🚀</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="features-panel">
+                    <h2 class="features-title">🎯 編碼解碼功能</h2>
+                    
+                    <div class="feature-item">
+                        <div class="feature-icon">🔗</div>
+                        <div class="feature-text">
+                            <div class="feature-title">Base64 編碼</div>
+                            <div class="feature-desc">將文字轉換為 Base64 格式，適用於資料傳輸與儲存</div>
+                        </div>
+                    </div>
+                    
+                    <div class="feature-item">
+                        <div class="feature-icon">🔓</div>
+                        <div class="feature-text">
+                            <div class="feature-title">Base64 解碼</div>
+                            <div class="feature-desc">將 Base64 編碼還原為原始文字內容</div>
+                        </div>
+                    </div>
+                    
+                    <div class="feature-item">
+                        <div class="feature-icon">🎨</div>
+                        <div class="feature-text">
+                            <div class="feature-title">Base58 支援</div>
+                            <div class="feature-desc">支援 Base58 編碼，常用於加密貨幣應用</div>
+                        </div>
+                    </div>
+                    
+                    <div class="feature-item">
+                        <div class="feature-icon">🌍</div>
+                        <div class="feature-text">
+                            <div class="feature-title">Unicode 支援</div>
+                            <div class="feature-desc">完整支援中文、表情符號等 Unicode 字元</div>
+                        </div>
+                    </div>
+                    
+                    <div class="feature-item">
+                        <div class="feature-icon">⚡</div>
+                        <div class="feature-text">
+                            <div class="feature-title">即時轉換</div>
+                            <div class="feature-desc">輸入後立即顯示轉換結果，操作流暢</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="download-controls">
+                <button class="download-btn" onclick="downloadScreenshot('screenshot1', 'base-encoder-1.png', 'png')">
+                    📥 PNG下載
+                </button>
+                <button class="download-btn jpeg" onclick="downloadScreenshot('screenshot1', 'base-encoder-1.jpg', 'jpeg')">
+                    📥 JPEG下載
+                </button>
+            </div>
+        </div>
+
+        <!-- 螢幕截圖 2: 進制轉換功能 -->
+        <div class="screenshot-item" id="screenshot2">
+            <div class="screenshot-header">
+                🔐 Base Encoder - 進制轉換功能
+            </div>
+            <div class="screenshot-content">
+                <div class="popup-mockup">
+                    <div class="popup-header">
+                        🔐 Base Encoder
+                    </div>
+                    <div class="popup-tabs">
+                        <div class="tab">編碼/解碼</div>
+                        <div class="tab active">進制轉換</div>
+                    </div>
+                    <div class="popup-content">
+                        <div class="form-group">
+                            <label>來源進制</label>
+                            <select class="form-control">
+                                <option>36進制</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>目標進制</label>
+                            <select class="form-control">
+                                <option>10進制</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>輸入數值</label>
+                            <input type="text" class="form-control" value="Z1K9">
+                        </div>
+                        <div class="conversion-example">
+                            <div><strong>範例:</strong></div>
+                            <div>36進制: Z1K9</div>
+                            <div class="conversion-arrow">⬇️</div>
+                            <div>10進制: 1,799,257</div>
+                        </div>
+                        <button class="btn">🔄 轉換</button>
+                        <div class="form-group">
+                            <label>轉換結果</label>
+                            <div class="result-box">1799257</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="features-panel">
+                    <h2 class="features-title">🔄 進制轉換功能</h2>
+                    
+                    <div class="feature-item">
+                        <div class="feature-icon">🔢</div>
+                        <div class="feature-text">
+                            <div class="feature-title">多進制支援</div>
+                            <div class="feature-desc">支援 2 到 36 進制之間的任意轉換</div>
+                        </div>
+                    </div>
+                    
+                    <div class="feature-item">
+                        <div class="feature-icon">🎯</div>
+                        <div class="feature-text">
+                            <div class="feature-title">智慧預設</div>
+                            <div class="feature-desc">預設 36 進制轉 10 進制，符合常用需求</div>
+                        </div>
+                    </div>
+                    
+                    <div class="feature-item">
+                        <div class="feature-icon">🛡️</div>
+                        <div class="feature-text">
+                            <div class="feature-title">錯誤檢測</div>
+                            <div class="feature-desc">自動檢測輸入格式，提供友善錯誤提示</div>
+                        </div>
+                    </div>
+                    
+                    <div class="feature-item">
+                        <div class="feature-icon">📊</div>
+                        <div class="feature-text">
+                            <div class="feature-title">大數值支援</div>
+                            <div class="feature-desc">支援大數值轉換，無長度限制</div>
+                        </div>
+                    </div>
+                    
+                    <div class="feature-item">
+                        <div class="feature-icon">💡</div>
+                        <div class="feature-text">
+                            <div class="feature-title">範例說明</div>
+                            <div class="feature-desc">提供轉換範例，幫助理解進制轉換</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="download-controls">
+                <button class="download-btn" onclick="downloadScreenshot('screenshot2', 'base-encoder-2.png', 'png')">
+                    📥 PNG下載
+                </button>
+                <button class="download-btn jpeg" onclick="downloadScreenshot('screenshot2', 'base-encoder-2.jpg', 'jpeg')">
+                    📥 JPEG下載
+                </button>
+            </div>
+        </div>
+
+        <!-- 螢幕截圖 3: 功能特色展示 -->
+        <div class="screenshot-item" id="screenshot3">
+            <div class="screenshot-header">
+                🔐 Base Encoder - 完整功能特色
+            </div>
+            <div style="padding: 40px; height: 680px; overflow: hidden;">
+                <div style="text-align: center; margin-bottom: 40px;">
+                    <h2 style="color: #2c3e50; margin-bottom: 15px; font-size: 32px;">✨ 完整功能特色</h2>
+                    <p style="color: #6c757d; font-size: 18px;">專業的編碼解碼與進制轉換工具</p>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; max-width: 1100px; margin: 0 auto;">
+                    <div style="text-align: center; padding: 30px; background: #f8f9fa; border-radius: 12px; border-left: 4px solid #4285f4;">
+                        <div style="font-size: 48px; margin-bottom: 20px;">🔗</div>
+                        <h3 style="font-size: 18px; font-weight: 600; color: #2c3e50; margin-bottom: 15px;">Base64/Base58 編碼</h3>
+                        <p style="font-size: 14px; color: #6c757d; line-height: 1.5; margin: 0;">支援文字與 URL 安全編碼，適用於數據傳輸與儲存</p>
+                    </div>
+                    
+                    <div style="text-align: center; padding: 30px; background: #f8f9fa; border-radius: 12px; border-left: 4px solid #34a853;">
+                        <div style="font-size: 48px; margin-bottom: 20px;">�</div>
+                        <h3 style="font-size: 18px; font-weight: 600; color: #2c3e50; margin-bottom: 15px;">進制轉換</h3>
+                        <p style="font-size: 14px; color: #6c757d; line-height: 1.5; margin: 0;">支援 2-36 進制之間的數值轉換，滿足各種計算需求</p>
+                    </div>
+                    
+                    <div style="text-align: center; padding: 30px; background: #f8f9fa; border-radius: 12px; border-left: 4px solid #fd7e14;">
+                        <div style="font-size: 48px; margin-bottom: 20px;">�</div>
+                        <h3 style="font-size: 18px; font-weight: 600; color: #2c3e50; margin-bottom: 15px;">資料持久化</h3>
+                        <p style="font-size: 14px; color: #6c757d; line-height: 1.5; margin: 0;">自動保存輸入內容和設定，重新開啟後可繼續使用</p>
+                    </div>
+                    
+                    <div style="text-align: center; padding: 30px; background: #f8f9fa; border-radius: 12px; border-left: 4px solid #e91e63;">
+                        <div style="font-size: 48px; margin-bottom: 20px;">🎨</div>
+                        <h3 style="font-size: 18px; font-weight: 600; color: #2c3e50; margin-bottom: 15px;">直觀介面</h3>
+                        <p style="font-size: 14px; color: #6c757d; line-height: 1.5; margin: 0;">分頁式設計，操作簡單，體驗流暢且現代化</p>
+                    </div>
+                    
+                    <div style="text-align: center; padding: 30px; background: #f8f9fa; border-radius: 12px; border-left: 4px solid #9c27b0;">
+                        <div style="font-size: 48px; margin-bottom: 20px;">🔒</div>
+                        <h3 style="font-size: 18px; font-weight: 600; color: #2c3e50; margin-bottom: 15px;">隱私安全</h3>
+                        <p style="font-size: 14px; color: #6c757d; line-height: 1.5; margin: 0;">所有資料在本地處理，保護隱私，不連接外部伺服器</p>
+                    </div>
+                    
+                    <div style="text-align: center; padding: 30px; background: #f8f9fa; border-radius: 12px; border-left: 4px solid #ff5722;">
+                        <div style="font-size: 48px; margin-bottom: 20px;">⚡</div>
+                        <h3 style="font-size: 18px; font-weight: 600; color: #2c3e50; margin-bottom: 15px;">高效能</h3>
+                        <p style="font-size: 14px; color: #6c757d; line-height: 1.5; margin: 0;">即時轉換，響應迅速，支援大容量資料處理</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="download-controls">
+                <button class="download-btn" onclick="downloadScreenshot('screenshot3', 'base-encoder-3.png', 'png')">
+                    📥 PNG下載
+                </button>
+                <button class="download-btn jpeg" onclick="downloadScreenshot('screenshot3', 'base-encoder-3.jpg', 'jpeg')">
+                    📥 JPEG下載
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div style="text-align: center; margin: 40px 0;">
+        <button class="download-btn" onclick="downloadAllScreenshots('png')" style="background: #6c5ce7; font-size: 16px; padding: 15px 30px; margin: 0 10px;">
+            📦 下載所有 PNG
+        </button>
+        <button class="download-btn jpeg" onclick="downloadAllScreenshots('jpeg')" style="font-size: 16px; padding: 15px 30px; margin: 0 10px;">
+            📦 下載所有 JPEG
+        </button>
+    </div>
+
+    <div style="background: #e9f7fe; padding: 20px; border-radius: 8px; margin-top: 30px; max-width: 800px; margin-left: auto; margin-right: auto;">
+        <h3>📋 使用說明</h3>
+        <ol>
+            <li>點擊各個螢幕截圖下方的「下載此螢幕截圖」按鈕</li>
+            <li>或使用「下載所有螢幕截圖」一次下載全部</li>
+            <li>在 Chrome Web Store 開發者後台上傳這些圖片</li>
+            <li>建議上傳順序：功能展示 → 編碼解碼 → 進制轉換</li>
+            <li>圖片尺寸已優化，符合 Chrome Web Store 要求</li>
+        </ol>
+        
+        <h4>🎯 隱私權政策文字（直接複製使用）</h4>
+        <div style="background: white; padding: 15px; border-radius: 4px; margin: 10px 0; font-family: monospace; font-size: 13px;">
+            <strong>單一用途說明：</strong><br>
+            Base Encoder 是一個專門用於文字編碼與解碼的工具，支援 Base64、Base58 及自訂進制轉換功能。此擴充功能僅專注於編碼解碼操作，不涉及其他功能。<br><br>
+            
+            <strong>Storage 權限說明：</strong><br>
+            本擴充功能使用 storage 權限來保存使用者的輸入內容、編碼解碼結果及介面設定（如標籤頁狀態），以提供更好的使用體驗。所有資料僅儲存在本地端，不會上傳至任何伺服器。<br><br>
+            
+            <strong>遠端程式碼說明：</strong><br>
+            本擴充功能不使用任何遠端程式碼，所有功能均在本地端執行。
+        </div>
+    </div>
+
+    <!-- 引入 html2canvas 庫 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
+    <script>
+        // 下載螢幕截圖功能 - 使用 html2canvas
+        async function downloadScreenshot(elementId, filename, format = 'png') {
+            try {
+                const element = document.getElementById(elementId);
+                
+                // 顯示載入提示
+                const btn = event.target;
+                const originalText = btn.textContent;
+                btn.textContent = '📷 正在生成截圖...';
+                btn.disabled = true;
+                
+                // 使用 html2canvas 截取元素
+                const canvas = await html2canvas(element, {
+                    backgroundColor: '#ffffff', // 強制白底，移除透明層
+                    scale: 1, // 確保 1280x800 尺寸
+                    useCORS: true,
+                    allowTaint: false,
+                    width: 1280,
+                    height: 800,
+                    scrollX: 0,
+                    scrollY: 0,
+                    removeContainer: true,
+                    foreignObjectRendering: false
+                });
+                
+                // 調整 canvas 尺寸為標準尺寸
+                const finalCanvas = document.createElement('canvas');
+                finalCanvas.width = 1280;
+                finalCanvas.height = 800;
+                const ctx = finalCanvas.getContext('2d');
+                
+                // 填充白色背景（確保無透明層）
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, 1280, 800);
+                
+                // 繪製截圖內容
+                ctx.drawImage(canvas, 0, 0, 1280, 800);
+                
+                // 根據格式下載
+                const link = document.createElement('a');
+                link.download = filename;
+                
+                if (format === 'jpeg') {
+                    link.href = finalCanvas.toDataURL('image/jpeg', 0.95);
+                } else {
+                    // PNG格式，確保無透明層
+                    link.href = finalCanvas.toDataURL('image/png');
+                }
+                
+                link.click();
+                
+                // 恢復按鈕狀態
+                btn.textContent = '✅ 下載完成！';
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.disabled = false;
+                }, 2000);
+                
+            } catch (error) {
+                console.error('截圖失敗:', error);
+                alert('截圖失敗！請嘗試手動截圖或重新整理頁面。');
+                event.target.disabled = false;
+                event.target.textContent = originalText;
+            }
+        }
+        
+        async function downloadAllScreenshots(format = 'png') {
+            const btn = event.target;
+            const originalText = btn.textContent;
+            btn.textContent = '📷 正在生成所有截圖...';
+            btn.disabled = true;
+            
+            try {
+                const extension = format === 'jpeg' ? 'jpg' : 'png';
+                
+                // 依序下載所有截圖
+                await new Promise(resolve => setTimeout(resolve, 500));
+                await downloadScreenshotSilent('screenshot1', `base-encoder-screenshot-1.${extension}`, format);
+                
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                await downloadScreenshotSilent('screenshot2', `base-encoder-screenshot-2.${extension}`, format);
+                
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                await downloadScreenshotSilent('screenshot3', `base-encoder-screenshot-3.${extension}`, format);
+                
+                btn.textContent = '✅ 所有截圖下載完成！';
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.disabled = false;
+                }, 3000);
+                
+            } catch (error) {
+                console.error('批次截圖失敗:', error);
+                btn.textContent = '❌ 下載失敗，請單獨下載';
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.disabled = false;
+                }, 3000);
+            }
+        }
+        
+        // 靜默下載（用於批次下載）
+        async function downloadScreenshotSilent(elementId, filename, format = 'png') {
+            const element = document.getElementById(elementId);
+            
+            const canvas = await html2canvas(element, {
+                backgroundColor: '#ffffff', // 強制白底
+                scale: 1,
+                useCORS: true,
+                allowTaint: false,
+                width: 1280,
+                height: 800,
+                scrollX: 0,
+                scrollY: 0,
+                removeContainer: true,
+                foreignObjectRendering: false
+            });
+            
+            // 調整 canvas 尺寸為標準尺寸
+            const finalCanvas = document.createElement('canvas');
+            finalCanvas.width = 1280;
+            finalCanvas.height = 800;
+            const ctx = finalCanvas.getContext('2d');
+            
+            // 填充白色背景（確保無透明層）
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, 1280, 800);
+            
+            // 繪製截圖內容
+            ctx.drawImage(canvas, 0, 0, 1280, 800);
+            
+            // 下載截圖
+            const link = document.createElement('a');
+            link.download = filename;
+            
+            if (format === 'jpeg') {
+                link.href = finalCanvas.toDataURL('image/jpeg', 0.95);
+            } else {
+                link.href = finalCanvas.toDataURL('image/png');
+            }
+            
+            link.click();
+        }
+        
+        // 手動截圖指南
+        function showManualGuide() {
+            const guide = `
+🎯 手動截圖指南：
+
+方法一：使用瀏覽器截圖
+1. 按 F12 開啟開發者工具
+2. 按 Ctrl+Shift+P (Mac: Cmd+Shift+P)
+3. 輸入 "screenshot" 並選擇 "Capture node screenshot"
+4. 點選要截圖的區域
+
+方法二：使用系統截圖工具
+• Windows: Win+Shift+S
+• Mac: Cmd+Shift+4
+• Linux: 使用 gnome-screenshot 或類似工具
+
+方法三：瀏覽器外掛
+• 使用 Lightshot、Awesome Screenshot 等外掛
+
+建議截圖尺寸：1280x800 或 640x400
+            `;
+            alert(guide);
+        }
+        
+        // 頁面載入完成後的初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 檢查 html2canvas 是否載入成功
+            if (typeof html2canvas === 'undefined') {
+                console.warn('html2canvas 載入失敗，將顯示手動截圖指南');
+                
+                // 替換所有下載按鈕為手動指南
+                const downloadBtns = document.querySelectorAll('.download-btn');
+                downloadBtns.forEach(btn => {
+                    if (btn.textContent.includes('下載')) {
+                        btn.textContent = '📖 查看手動截圖指南';
+                        btn.onclick = showManualGuide;
+                    }
+                });
+                
+                // 顯示提示
+                setTimeout(() => {
+                    alert('自動截圖功能載入失敗！\n\n請使用手動截圖方式：\n1. 點擊任一按鈕查看詳細指南\n2. 或直接使用系統截圖工具截取螢幕\n3. 建議截圖尺寸：1280x800');
+                }, 1000);
+            } else {
+                console.log('html2canvas 載入成功！');
+            }
+            
+            // 優化顯示效果
+            const screenshotItems = document.querySelectorAll('.screenshot-item');
+            screenshotItems.forEach((item, index) => {
+                item.style.animationDelay = `${index * 0.1}s`;
+            });
+        });
+        
+        // 為截圖區域添加邊框突出效果
+        function highlightScreenshotArea(elementId) {
+            const element = document.getElementById(elementId);
+            element.style.outline = '3px solid #4285f4';
+            element.style.outlineOffset = '5px';
+            
+            setTimeout(() => {
+                element.style.outline = 'none';
+                element.style.outlineOffset = '0';
+            }, 2000);
+        }
+    </script>
+</body>
+</html>

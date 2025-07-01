@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Popup 功能測試</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 400px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .mode-selection {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        .mode-selection label {
+            display: inline-block;
+            margin: 0 15px;
+            cursor: pointer;
+        }
+        textarea, input, select {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #007cba;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 0;
+        }
+        button:hover {
+            background: #005a87;
+        }
+        .custom-base-input {
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .custom-base-input label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .result {
+            min-height: 80px;
+            resize: vertical;
+        }
+        .success {
+            border-color: #28a745;
+        }
+        .error {
+            border-color: #dc3545;
+            background-color: #f8d7da;
+        }
+        .status {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+        }
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Popup 功能測試</h1>
+        <p style="text-align: center; color: #666; font-size: 14px;">
+            測試 Chrome 擴充功能的 popup 介面功能
+        </p>
+        
+        <div class="mode-selection">
+            <label>
+                <input type="radio" name="mode" value="encode" checked>
+                編碼
+            </label>
+            <label>
+                <input type="radio" name="mode" value="decode">
+                解碼
+            </label>
+        </div>
+        
+        <textarea id="input" placeholder="輸入要處理的內容" rows="3">Hello 世界 😀</textarea>
+        
+        <div class="format-selection">
+            <label>選擇格式:</label>
+            <select id="format">
+                <option value="base64">Base64</option>
+                <option value="base58">Base58</option>
+                <option value="custom">自訂進制 (2-36)</option>
+            </select>
+        </div>
+        
+        <div class="custom-base-input" id="customBaseInput" style="display: none;">
+            <label>進制 (2-36):</label>
+            <input type="number" id="baseNumber" min="2" max="36" value="16" placeholder="輸入進制數字">
+        </div>
+        
+        <div class="action-button">
+            <button id="process">處理</button>
+        </div>
+        
+        <h2>結果</h2>
+        <textarea id="output" class="result" placeholder="處理結果" readonly rows="4"></textarea>
+        
+        <div id="status"></div>
+        
+        <div style="margin-top: 20px; padding: 15px; background: #e9ecef; border-radius: 4px; font-size: 13px;">
+            <h4>測試建議：</h4>
+            <ol>
+                <li>選擇「自訂進制」，進制設為 16，編碼 "Hello"</li>
+                <li>選擇「自訂進制」，進制設為 2，編碼 "A"</li>
+                <li>選擇「自訂進制」，進制設為 10，編碼 "你好"</li>
+                <li>測試解碼：將編碼結果複製到輸入框，選擇解碼模式</li>
+            </ol>
+        </div>
+    </div>
+    
+    <script src="src/utils/encoders.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const inputField = document.getElementById("input");
+            const outputField = document.getElementById("output");
+            const processButton = document.getElementById("process");
+            const formatSelect = document.getElementById("format");
+            const modeRadios = document.querySelectorAll('input[name="mode"]');
+            const customBaseInput = document.getElementById("customBaseInput");
+            const baseNumberInput = document.getElementById("baseNumber");
+            const statusDiv = document.getElementById("status");
+
+            // 顯示狀態訊息
+            function showStatus(message, type = 'info') {
+                statusDiv.textContent = message;
+                statusDiv.className = `status ${type}`;
+                setTimeout(() => {
+                    statusDiv.textContent = '';
+                    statusDiv.className = '';
+                }, 3000);
+            }
+
+            // 顯示/隱藏自訂進制輸入框
+            function toggleCustomBaseInput() {
+                const selectedFormat = formatSelect.value;
+                if (selectedFormat === "custom") {
+                    customBaseInput.style.display = "block";
+                    showStatus("自訂進制模式已啟用", "success");
+                } else {
+                    customBaseInput.style.display = "none";
+                }
+            }
+
+            // 監聽格式選擇變更
+            formatSelect.addEventListener("change", toggleCustomBaseInput);
+
+            // 更新介面文字和佔位符
+            function updateInterface() {
+                const selectedMode = document.querySelector(
+                    'input[name="mode"]:checked'
+                ).value;
+                const isEncode = selectedMode === "encode";
+
+                processButton.textContent = isEncode ? "編碼" : "解碼";
+                inputField.placeholder = isEncode ? "輸入要編碼的內容" : "輸入要解碼的內容";
+                outputField.placeholder = isEncode ? "編碼結果" : "解碼結果";
+            }
+
+            // 監聽模式變更
+            modeRadios.forEach((radio) => {
+                radio.addEventListener("change", updateInterface);
+            });
+
+            // 處理按鈕點擊事件
+            processButton.addEventListener("click", function () {
+                const inputText = inputField.value.trim();
+                const selectedFormat = formatSelect.value;
+                const selectedMode = document.querySelector(
+                    'input[name="mode"]:checked'
+                ).value;
+
+                if (inputText === "") {
+                    outputField.value = "";
+                    outputField.className = "result";
+                    showStatus("請輸入要處理的內容", "error");
+                    return;
+                }
+
+                try {
+                    let result;
+
+                    if (selectedMode === "encode") {
+                        // 編碼模式
+                        switch (selectedFormat) {
+                            case "base64":
+                                result = base64Encode(inputText);
+                                showStatus("Base64 編碼成功", "success");
+                                break;
+                            case "base58":
+                                result = base58Encode(inputText);
+                                showStatus("Base58 編碼成功", "success");
+                                break;
+                            case "custom":
+                                const baseNumber = parseInt(baseNumberInput.value);
+                                if (isNaN(baseNumber) || baseNumber < 2 || baseNumber > 36) {
+                                    throw new Error("進制必須在 2 到 36 之間");
+                                }
+                                result = customBaseEncode(inputText, baseNumber);
+                                showStatus(`Base${baseNumber} 編碼成功`, "success");
+                                break;
+                            default:
+                                throw new Error("不支援的編碼格式");
+                        }
+                    } else {
+                        // 解碼模式
+                        switch (selectedFormat) {
+                            case "base64":
+                                result = base64Decode(inputText);
+                                showStatus("Base64 解碼成功", "success");
+                                break;
+                            case "base58":
+                                result = base58Decode(inputText);
+                                showStatus("Base58 解碼成功", "success");
+                                break;
+                            case "custom":
+                                const baseNumber = parseInt(baseNumberInput.value);
+                                if (isNaN(baseNumber) || baseNumber < 2 || baseNumber > 36) {
+                                    throw new Error("進制必須在 2 到 36 之間");
+                                }
+                                result = customBaseDecode(inputText, baseNumber);
+                                showStatus(`Base${baseNumber} 解碼成功`, "success");
+                                break;
+                            default:
+                                throw new Error("不支援的解碼格式");
+                        }
+                    }
+
+                    outputField.value = result;
+                    outputField.className = "result success";
+                } catch (error) {
+                    outputField.value = `錯誤: ${error.message}`;
+                    outputField.className = "result error";
+                    showStatus(error.message, "error");
+                }
+            });
+
+            // 支援 Enter 鍵處理
+            inputField.addEventListener("keypress", function (event) {
+                if (event.key === "Enter" && !event.shiftKey) {
+                    event.preventDefault();
+                    processButton.click();
+                }
+            });
+
+            // 初始化介面
+            updateInterface();
+            toggleCustomBaseInput(); // 初始化自訂進制輸入框的顯示狀態
+
+            // 檢查函數是否正確載入
+            console.log('函數載入狀態:', {
+                base64Encode: typeof base64Encode,
+                base64Decode: typeof base64Decode,
+                base58Encode: typeof base58Encode,
+                base58Decode: typeof base58Decode,
+                customBaseEncode: typeof customBaseEncode,
+                customBaseDecode: typeof customBaseDecode
+            });
+
+            showStatus("Popup 功能測試頁面已載入", "success");
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Test Encoders</title>
+</head>
+<body>
+    <h1>測試編碼器</h1>
+    <input type="text" id="testInput" placeholder="輸入測試文字" value="Hello World">
+    <button onclick="test()">測試</button>
+    <div id="results"></div>
+
+    <script src="src/utils/encoders.js"></script>
+    <script>
+        function test() {
+            const input = document.getElementById('testInput').value;
+            const results = document.getElementById('results');
+            
+            try {
+                const base64Result = base64Encode(input);
+                const base32Result = base32Encode(input);
+                const base58Result = base58Encode(input);
+                
+                results.innerHTML = `
+                    <p><strong>輸入:</strong> ${input}</p>
+                    <p><strong>Base64:</strong> ${base64Result}</p>
+                    <p><strong>Base32:</strong> ${base32Result}</p>
+                    <p><strong>Base58:</strong> ${base58Result}</p>
+                `;
+            } catch (error) {
+                results.innerHTML = `<p style="color: red;">錯誤: ${error.message}</p>`;
+            }
+        }
+        
+        // 自動測試
+        test();
+    </script>
+</body>
+</html>

@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chrome 擴充功能圖示生成器</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .icon-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .icon-item {
+            text-align: center;
+            padding: 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            background: #f8f9fa;
+        }
+        .icon-item h3 {
+            margin: 10px 0 15px 0;
+            color: #495057;
+        }
+        canvas {
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .download-btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+        .download-btn:hover {
+            background: #0056b3;
+        }
+        .controls {
+            background: #f1f3f4;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .control-group {
+            margin: 10px 0;
+        }
+        label {
+            display: inline-block;
+            width: 120px;
+            font-weight: 500;
+        }
+        input, select {
+            padding: 5px 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin-left: 10px;
+        }
+        .color-preview {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 1px solid #ccc;
+            margin-left: 5px;
+            vertical-align: middle;
+        }
+        .regenerate-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        .regenerate-btn:hover {
+            background: #218838;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 Base Encoder 圖示生成器</h1>
+        
+        <div class="controls">
+            <h3>🎛️ 圖示設定</h3>
+            <div class="control-group">
+                <label>主要顏色:</label>
+                <input type="color" id="primaryColor" value="#4285f4">
+                <span class="color-preview" id="primaryPreview"></span>
+            </div>
+            <div class="control-group">
+                <label>次要顏色:</label>
+                <input type="color" id="secondaryColor" value="#34a853">
+                <span class="color-preview" id="secondaryPreview"></span>
+            </div>
+            <div class="control-group">
+                <label>背景樣式:</label>
+                <select id="backgroundStyle">
+                    <option value="gradient">漸層</option>
+                    <option value="solid">純色</option>
+                    <option value="pattern">圖案</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label>文字樣式:</label>
+                <select id="textStyle">
+                    <option value="bold">粗體</option>
+                    <option value="normal">一般</option>
+                    <option value="light">細體</option>
+                </select>
+            </div>
+            <button class="regenerate-btn" onclick="generateAllIcons()">🔄 重新生成圖示</button>
+            <button class="regenerate-btn" onclick="downloadAll()" style="background: #fd7e14;">📦 下載所有圖示</button>
+        </div>
+
+        <div class="icon-grid">
+            <div class="icon-item">
+                <h3>16x16 px</h3>
+                <canvas id="icon16" width="16" height="16"></canvas>
+                <br>
+                <button class="download-btn" onclick="downloadIcon('icon16', 'icon16.png')">下載</button>
+            </div>
+            
+            <div class="icon-item">
+                <h3>48x48 px</h3>
+                <canvas id="icon48" width="48" height="48"></canvas>
+                <br>
+                <button class="download-btn" onclick="downloadIcon('icon48', 'icon48.png')">下載</button>
+            </div>
+            
+            <div class="icon-item">
+                <h3>128x128 px</h3>
+                <canvas id="icon128" width="128" height="128"></canvas>
+                <br>
+                <button class="download-btn" onclick="downloadIcon('icon128', 'icon128.png')">下載</button>
+            </div>
+        </div>
+
+        <div style="background: #e9f7fe; padding: 20px; border-radius: 8px; margin-top: 20px;">
+            <h3>📋 使用說明</h3>
+            <ol>
+                <li>調整上方的顏色和樣式設定</li>
+                <li>點擊「重新生成圖示」查看效果</li>
+                <li>分別下載各個尺寸的圖示檔案</li>
+                <li>或使用「下載所有圖示」一次下載全部</li>
+                <li>將下載的檔案替換 <code>icons/</code> 目錄中的檔案</li>
+                <li>重新建立發佈檔案並上傳到 Chrome Web Store</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        // 更新顏色預覽
+        function updateColorPreviews() {
+            document.getElementById('primaryPreview').style.backgroundColor = document.getElementById('primaryColor').value;
+            document.getElementById('secondaryPreview').style.backgroundColor = document.getElementById('secondaryColor').value;
+        }
+
+        // 繪製圖示
+        function drawIcon(canvasId, size) {
+            const canvas = document.getElementById(canvasId);
+            const ctx = canvas.getContext('2d');
+            
+            // 設定 Canvas 的實際尺寸
+            canvas.width = size;
+            canvas.height = size;
+            
+            // 清空畫布
+            ctx.clearRect(0, 0, size, size);
+            
+            // 獲取設定
+            const primaryColor = document.getElementById('primaryColor').value;
+            const secondaryColor = document.getElementById('secondaryColor').value;
+            const backgroundStyle = document.getElementById('backgroundStyle').value;
+            const textStyle = document.getElementById('textStyle').value;
+            
+            // 繪製背景
+            if (backgroundStyle === 'gradient') {
+                const gradient = ctx.createLinearGradient(0, 0, size, size);
+                gradient.addColorStop(0, primaryColor);
+                gradient.addColorStop(1, secondaryColor);
+                ctx.fillStyle = gradient;
+            } else if (backgroundStyle === 'solid') {
+                ctx.fillStyle = primaryColor;
+            } else if (backgroundStyle === 'pattern') {
+                // 繪製圖案背景
+                ctx.fillStyle = primaryColor;
+                ctx.fillRect(0, 0, size, size);
+                
+                ctx.fillStyle = secondaryColor;
+                const patternSize = Math.max(2, size / 8);
+                for (let i = 0; i < size; i += patternSize * 2) {
+                    for (let j = 0; j < size; j += patternSize * 2) {
+                        ctx.fillRect(i, j, patternSize, patternSize);
+                        ctx.fillRect(i + patternSize, j + patternSize, patternSize, patternSize);
+                    }
+                }
+            }
+            
+            if (backgroundStyle !== 'pattern') {
+                // 繪製圓角矩形背景 - 使用兼容性更好的方法
+                const cornerRadius = size * 0.15;
+                drawRoundRect(ctx, 0, 0, size, size, cornerRadius);
+                ctx.fill();
+            }
+            
+            // 繪製中央圖案 - Base64 概念的視覺表現
+            const centerX = size / 2;
+            const centerY = size / 2;
+            const iconSize = size * 0.6;
+            
+            // 繪製編碼符號
+            ctx.fillStyle = '#ffffff';
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = Math.max(1, size / 32);
+            
+            if (size >= 48) {
+                // 大圖示：繪製 "64" 文字和編碼符號
+                const fontSize = size * 0.25;
+                ctx.font = `${textStyle === 'bold' ? 'bold' : textStyle === 'light' ? '300' : 'normal'} ${fontSize}px Arial, sans-serif`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                
+                // 繪製 "B64" 
+                ctx.fillText('B64', centerX, centerY - size * 0.05);
+                
+                // 繪製轉換箭頭
+                const arrowY = centerY + size * 0.2;
+                const arrowSize = size * 0.15;
+                ctx.beginPath();
+                ctx.moveTo(centerX - arrowSize, arrowY);
+                ctx.lineTo(centerX + arrowSize, arrowY);
+                ctx.moveTo(centerX + arrowSize - arrowSize * 0.3, arrowY - arrowSize * 0.3);
+                ctx.lineTo(centerX + arrowSize, arrowY);
+                ctx.lineTo(centerX + arrowSize - arrowSize * 0.3, arrowY + arrowSize * 0.3);
+                ctx.stroke();
+                
+            } else if (size >= 32) {
+                // 中圖示：簡化的設計
+                const fontSize = size * 0.35;
+                ctx.font = `${textStyle === 'bold' ? 'bold' : 'normal'} ${fontSize}px Arial, sans-serif`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('64', centerX, centerY);
+                
+            } else {
+                // 小圖示：最簡設計
+                const symbolSize = size * 0.7;
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(centerX - symbolSize/4, centerY - symbolSize/4, symbolSize/2, symbolSize/2);
+                
+                // 添加小點表示編碼
+                const dotSize = size * 0.08;
+                ctx.beginPath();
+                ctx.arc(centerX - symbolSize/3, centerY - symbolSize/3, dotSize, 0, Math.PI * 2);
+                ctx.arc(centerX + symbolSize/3, centerY - symbolSize/3, dotSize, 0, Math.PI * 2);
+                ctx.arc(centerX, centerY + symbolSize/3, dotSize, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        // 生成所有圖示
+        function generateAllIcons() {
+            drawIcon('icon16', 16);
+            drawIcon('icon48', 48);
+            drawIcon('icon128', 128);
+        }
+
+        // 下載單個圖示
+        function downloadIcon(canvasId, filename) {
+            const canvas = document.getElementById(canvasId);
+            const link = document.createElement('a');
+            link.download = filename;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+
+        // 下載所有圖示
+        function downloadAll() {
+            setTimeout(() => downloadIcon('icon16', 'icon16.png'), 100);
+            setTimeout(() => downloadIcon('icon48', 'icon48.png'), 200);
+            setTimeout(() => downloadIcon('icon128', 'icon128.png'), 300);
+        }
+
+        // Canvas roundRect 兼容性函數
+        function drawRoundRect(ctx, x, y, width, height, radius) {
+            if (typeof radius === 'undefined') {
+                radius = 5;
+            }
+            if (typeof radius === 'number') {
+                radius = {tl: radius, tr: radius, br: radius, bl: radius};
+            } else {
+                var defaultRadius = {tl: 0, tr: 0, br: 0, bl: 0};
+                for (var side in defaultRadius) {
+                    radius[side] = radius[side] || defaultRadius[side];
+                }
+            }
+            ctx.beginPath();
+            ctx.moveTo(x + radius.tl, y);
+            ctx.lineTo(x + width - radius.tr, y);
+            ctx.quadraticCurveTo(x + width, y, x + width, y + radius.tr);
+            ctx.lineTo(x + width, y + height - radius.br);
+            ctx.quadraticCurveTo(x + width, y + height, x + width - radius.br, y + height);
+            ctx.lineTo(x + radius.bl, y + height);
+            ctx.quadraticCurveTo(x, y + height, x, y + height - radius.bl);
+            ctx.lineTo(x, y + radius.tl);
+            ctx.quadraticCurveTo(x, y, x + radius.tl, y);
+            ctx.closePath();
+        }
+
+        // Canvas roundRect polyfill (備用)
+        if (!CanvasRenderingContext2D.prototype.roundRect) {
+            CanvasRenderingContext2D.prototype.roundRect = function(x, y, width, height, radius) {
+                drawRoundRect(this, x, y, width, height, radius);
+            };
+        }
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 設定事件監聽器
+            document.getElementById('primaryColor').addEventListener('change', function() {
+                updateColorPreviews();
+                generateAllIcons();
+            });
+            
+            document.getElementById('secondaryColor').addEventListener('change', function() {
+                updateColorPreviews();
+                generateAllIcons();
+            });
+            
+            document.getElementById('backgroundStyle').addEventListener('change', generateAllIcons);
+            document.getElementById('textStyle').addEventListener('change', generateAllIcons);
+            
+            // 初始化
+            updateColorPreviews();
+            generateAllIcons();
+        });
+    </script>
+</body>
+</html>

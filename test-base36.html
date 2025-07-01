@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>36 進制轉換測試</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test-case { background: #f0f0f0; padding: 15px; margin: 10px 0; border-radius: 5px; }
+        .result { font-weight: bold; color: #007cba; }
+        .success { color: green; }
+    </style>
+</head>
+<body>
+    <h1>36 進制轉換範例測試</h1>
+    
+    <div class="test-case">
+        <h3>測試 1: "Z" (36進制) → 10進制</h3>
+        <div id="test1-result"></div>
+    </div>
+    
+    <div class="test-case">
+        <h3>測試 2: "ZZ" (36進制) → 10進制</h3>
+        <div id="test2-result"></div>
+    </div>
+    
+    <div class="test-case">
+        <h3>測試 3: "10" (36進制) → 10進制</h3>
+        <div id="test3-result"></div>
+    </div>
+    
+    <div class="test-case">
+        <h3>測試 4: "ABC" (36進制) → 10進制</h3>
+        <div id="test4-result"></div>
+    </div>
+    
+    <script src="src/utils/encoders.js"></script>
+    <script>
+        function testConversion(input, expectedResult, testId) {
+            const fromBase = 36;
+            const toBase = 10;
+            
+            try {
+                const result = baseConvert(input, fromBase, toBase);
+                const isCorrect = expectedResult ? result === expectedResult.toString() : true;
+                
+                document.getElementById(testId).innerHTML = `
+                    <div>輸入: "${input}" (${fromBase}進制)</div>
+                    <div>結果: <span class="result">${result}</span> (${toBase}進制)</div>
+                    ${expectedResult ? `<div>期望: ${expectedResult}</div>` : ''}
+                    ${expectedResult ? `<div class="${isCorrect ? 'success' : 'error'}">${isCorrect ? '✅ 正確' : '❌ 錯誤'}</div>` : ''}
+                `;
+                
+                console.log(`${input} (36進制) = ${result} (10進制)`);
+            } catch (error) {
+                document.getElementById(testId).innerHTML = `
+                    <div class="error">錯誤: ${error.message}</div>
+                `;
+            }
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('36 進制轉換測試開始...');
+            
+            // Z = 35 (在36進制中，Z是最大的單位數字)
+            testConversion('Z', 35, 'test1-result');
+            
+            // ZZ = 35*36 + 35 = 1260 + 35 = 1295
+            testConversion('ZZ', 1295, 'test2-result');
+            
+            // 10 = 1*36 + 0 = 36
+            testConversion('10', 36, 'test3-result');
+            
+            // ABC = 10*36^2 + 11*36 + 12 = 10*1296 + 396 + 12 = 12960 + 396 + 12 = 13368
+            testConversion('ABC', 13368, 'test4-result');
+        });
+    </script>
+</body>
+</html>

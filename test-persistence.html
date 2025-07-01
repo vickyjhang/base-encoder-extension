@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>數據持久化測試</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .info-box {
+            background: #e3f2fd;
+            border: 1px solid #1976d2;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 10px 0;
+        }
+        .warning-box {
+            background: #fff3e0;
+            border: 1px solid #f57c00;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 10px 0;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #0056b3; }
+        button.danger {
+            background: #dc3545;
+        }
+        button.danger:hover {
+            background: #c82333;
+        }
+        pre {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid #dee2e6;
+            overflow-x: auto;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🔄 數據持久化功能測試</h1>
+        
+        <div class="info-box">
+            <h3>📋 測試說明</h3>
+            <p>此測試頁面模擬擴充功能的數據持久化功能，使用 localStorage 儲存和恢復使用者輸入的數據。</p>
+        </div>
+
+        <div class="warning-box">
+            <h3>⚠️ 重要提醒</h3>
+            <p>在實際的 Chrome 擴充功能中，建議使用 <code>chrome.storage.local</code> 而非 <code>localStorage</code>，因為擴充功能的 localStorage 在某些情況下可能會被清除。</p>
+        </div>
+
+        <h3>🧪 測試步驟</h3>
+        <ol>
+            <li>在下方 popup 介面中輸入一些數據</li>
+            <li>切換不同的分頁和設定</li>
+            <li>點擊「重新載入頁面」模擬重新開啟擴充功能</li>
+            <li>檢查數據是否成功恢復</li>
+        </ol>
+
+        <div style="text-align: center; margin: 20px 0;">
+            <button onclick="location.reload()">🔄 重新載入頁面</button>
+            <button onclick="clearStoredData()" class="danger">🗑️ 清除儲存數據</button>
+            <button onclick="showStoredData()">📊 查看儲存數據</button>
+        </div>
+
+        <div id="storage-info" class="status" style="display: none;"></div>
+    </div>
+
+    <!-- 模擬 popup 介面 -->
+    <div class="test-container">
+        <h2>📱 模擬擴充功能介面</h2>
+        
+        <!-- 直接嵌入 popup HTML 結構 -->
+        <div style="border: 2px solid #007bff; border-radius: 8px; padding: 20px; background: #f9f9f9;">
+            <link rel="stylesheet" href="src/popup/popup.css">
+            
+            <div class="container">
+                <h1>編碼/解碼器</h1>
+                
+                <!-- 功能選擇標籤 -->
+                <div class="tab-container">
+                    <button class="tab-button active" id="encode-tab">編碼/解碼</button>
+                    <button class="tab-button" id="convert-tab">進制轉換</button>
+                </div>
+                
+                <!-- 編碼/解碼區塊 -->
+                <div class="tab-content active" id="encode-section">
+                    <div class="mode-selection">
+                        <label>
+                            <input type="radio" name="mode" value="encode" checked>
+                            編碼
+                        </label>
+                        <label>
+                            <input type="radio" name="mode" value="decode">
+                            解碼
+                        </label>
+                    </div>
+                    
+                    <textarea id="input" placeholder="輸入要處理的內容"></textarea>
+                    
+                    <div class="format-selection">
+                        <label>選擇格式:</label>
+                        <select id="format">
+                            <option value="base64">Base64</option>
+                            <option value="base58">Base58</option>
+                        </select>
+                    </div>
+                    
+                    <div class="action-button">
+                        <button id="process">處理</button>
+                    </div>
+                    
+                    <h2>結果</h2>
+                    <textarea id="output" placeholder="處理結果" readonly></textarea>
+                </div>
+                
+                <!-- 進制轉換區塊 -->
+                <div class="tab-content" id="convert-section">
+                    <div class="convert-input-group">
+                        <div class="base-input-row">
+                            <div class="base-input-half">
+                                <label>來源進制 (2-36):</label>
+                                <input type="number" id="fromBase" min="2" max="36" value="36" placeholder="來源進制">
+                            </div>
+                            <div class="base-input-half">
+                                <label>目標進制 (2-36):</label>
+                                <input type="number" id="toBase" min="2" max="36" value="10" placeholder="目標進制">
+                            </div>
+                        </div>
+                        
+                        <label>輸入數字:</label>
+                        <textarea id="convertInput" placeholder="輸入要轉換的數字" rows="3"></textarea>
+                        
+                        <div class="action-button">
+                            <button id="convertButton">轉換</button>
+                            <button id="clearButton" class="secondary">清除</button>
+                        </div>
+                    </div>
+                    
+                    <h2>轉換結果</h2>
+                    <textarea id="convertOutput" placeholder="轉換結果" readonly></textarea>
+                    
+                    <div class="base-reference">
+                        <small>
+                            <strong>進制參考:</strong> 
+                            2進制(0,1) | 8進制(0-7) | 10進制(0-9) | 16進制(0-9,A-F) | 36進制(0-9,A-Z)
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="src/utils/encoders.js"></script>
+    <script src="src/popup/popup.js"></script>
+    <script>
+        function clearStoredData() {
+            localStorage.removeItem('encoderExtensionData');
+            showMessage('✅ 儲存數據已清除', 'success');
+            setTimeout(() => location.reload(), 1000);
+        }
+
+        function showStoredData() {
+            const data = localStorage.getItem('encoderExtensionData');
+            const infoDiv = document.getElementById('storage-info');
+            
+            if (data) {
+                const parsedData = JSON.parse(data);
+                infoDiv.innerHTML = `
+                    <h4>📊 當前儲存的數據：</h4>
+                    <pre>${JSON.stringify(parsedData, null, 2)}</pre>
+                `;
+                infoDiv.className = 'status success';
+            } else {
+                infoDiv.innerHTML = '<h4>📭 沒有儲存任何數據</h4>';
+                infoDiv.className = 'status error';
+            }
+            infoDiv.style.display = 'block';
+        }
+
+        function showMessage(message, type) {
+            const infoDiv = document.getElementById('storage-info');
+            infoDiv.innerHTML = `<h4>${message}</h4>`;
+            infoDiv.className = `status ${type}`;
+            infoDiv.style.display = 'block';
+        }
+
+        // 頁面載入時顯示儲存狀態
+        window.addEventListener('load', function() {
+            setTimeout(showStoredData, 500);
+        });
+    </script>
+</body>
+</html>

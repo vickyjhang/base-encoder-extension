@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Base Encoder - 簡化螢幕截圖</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f0f2f5;
+            overflow-x: hidden;
+        }
+        
+        .screenshot-page {
+            width: 1280px;
+            height: 800px;
+            background: white;
+            margin: 20px auto;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+        }
+        
+        .page-header {
+            background: linear-gradient(135deg, #4285f4, #34a853);
+            color: white;
+            padding: 20px 40px;
+            text-align: center;
+        }
+        
+        .page-title {
+            font-size: 32px;
+            font-weight: 700;
+            margin: 0 0 10px 0;
+        }
+        
+        .page-subtitle {
+            font-size: 18px;
+            opacity: 0.9;
+            margin: 0;
+        }
+        
+        .page-content {
+            padding: 40px;
+            display: flex;
+            gap: 40px;
+            height: calc(800px - 120px);
+            box-sizing: border-box;
+        }
+        
+        .popup-demo {
+            width: 380px;
+            height: 550px;
+            border: 3px solid #e0e0e0;
+            border-radius: 12px;
+            background: white;
+            box-shadow: 0 12px 35px rgba(0,0,0,0.15);
+            overflow: hidden;
+        }
+        
+        .popup-header {
+            background: linear-gradient(135deg, #4285f4, #34a853);
+            color: white;
+            padding: 15px 20px;
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .popup-tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 2px solid #dee2e6;
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            font-weight: 500;
+            border-bottom: 3px solid transparent;
+        }
+        
+        .tab.active {
+            background: white;
+            border-bottom-color: #4285f4;
+            color: #4285f4;
+            font-weight: 600;
+        }
+        
+        .popup-body {
+            padding: 25px;
+            overflow: hidden;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #495057;
+            font-size: 14px;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #ced4da;
+            border-radius: 6px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        
+        .form-control:focus {
+            border-color: #4285f4;
+            box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.1);
+        }
+        
+        .btn-primary {
+            background: #4285f4;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            width: 100%;
+            margin: 10px 0;
+            cursor: pointer;
+        }
+        
+        .result-display {
+            background: #f8f9fa;
+            border: 2px solid #dee2e6;
+            border-radius: 6px;
+            padding: 15px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 12px;
+            height: 40px;
+            word-break: break-all;
+            color: #495057;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+        }
+        
+        .feature-panel {
+            flex: 1;
+            padding: 20px;
+        }
+        
+        .feature-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .feature-list {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .feature-item {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            margin-bottom: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #4285f4;
+        }
+        
+        .feature-icon {
+            font-size: 28px;
+            margin-right: 20px;
+            width: 50px;
+            text-align: center;
+        }
+        
+        .feature-text {
+            flex: 1;
+        }
+        
+        .feature-name {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+        
+        .feature-desc {
+            font-size: 13px;
+            color: #6c757d;
+            line-height: 1.4;
+        }
+        
+        .navigation {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            padding: 15px;
+            z-index: 1000;
+        }
+        
+        .nav-btn {
+            display: block;
+            background: #4285f4;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            margin: 5px 0;
+            cursor: pointer;
+            font-size: 14px;
+            width: 200px;
+        }
+        
+        .nav-btn:hover {
+            background: #3367d6;
+        }
+        
+        .instruction-panel {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: #e9f7fe;
+            border: 2px solid #4285f4;
+            border-radius: 8px;
+            padding: 20px;
+            max-width: 400px;
+            z-index: 1000;
+        }
+        
+        .instruction-title {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        
+        .instruction-text {
+            font-size: 13px;
+            color: #495057;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+    <!-- 導航面板 -->
+    <div class="navigation">
+        <button class="nav-btn" onclick="showPage1()">📱 螢幕截圖 1: 編碼解碼</button>
+        <button class="nav-btn" onclick="showPage2()">🔄 螢幕截圖 2: 進制轉換</button>
+        <button class="nav-btn" onclick="showPage3()">✨ 螢幕截圖 3: 功能特色</button>
+        <button class="nav-btn" onclick="window.print()" style="background: #28a745;">🖨️ 列印/儲存為PDF</button>
+    </div>
+    
+    <!-- 說明面板 -->
+    <div class="instruction-panel">
+        <div class="instruction-title">📸 截圖說明</div>
+        <div class="instruction-text">
+            1. 點擊上方按鈕切換不同的螢幕截圖<br>
+            2. 使用系統截圖工具截取整個白色區域<br>
+            3. 或點擊「列印/儲存為PDF」製作高解析度圖片<br>
+            4. 建議尺寸：1280x800 像素
+        </div>
+    </div>
+
+    <!-- 螢幕截圖 1: 編碼解碼功能 -->
+    <div class="screenshot-page" id="page1">
+        <div class="page-header">
+            <div class="page-title">🔐 Base Encoder</div>
+            <div class="page-subtitle">專業的編碼解碼與進制轉換工具</div>
+        </div>
+        <div class="page-content">
+            <div class="popup-demo">
+                <div class="popup-header">🔐 Base Encoder</div>
+                <div class="popup-tabs">
+                    <div class="tab active">編碼/解碼</div>
+                    <div class="tab">進制轉換</div>
+                </div>
+                <div class="popup-body">
+                    <div class="form-group">
+                        <label class="form-label">編碼類型</label>
+                        <select class="form-control">
+                            <option>Base64</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">輸入文字</label>
+                        <textarea class="form-control" rows="2" style="resize: none; overflow: hidden;">Hello World! 測試文字 🚀</textarea>
+                    </div>
+                    
+                    <button class="btn-primary">🔗 編碼</button>
+                    
+                    <div class="form-group">
+                        <label class="form-label">編碼結果</label>
+                        <div class="result-display">SGVsbG8gV29ybGQhIOa4rOippuaWh+Wtlzog8J+agA==</div>
+                    </div>
+                    
+                    <button class="btn-primary" style="background: #fd7e14;">🔓 解碼</button>
+                    
+                    <div class="form-group">
+                        <label class="form-label">解碼結果</label>
+                        <div class="result-display">Hello World! 測試文字 🚀</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="feature-panel">
+                <div class="feature-title">🎯 編碼解碼功能</div>
+                <ul class="feature-list">
+                    <li class="feature-item">
+                        <div class="feature-icon">🔗</div>
+                        <div class="feature-text">
+                            <div class="feature-name">Base64 編碼</div>
+                            <div class="feature-desc">將文字轉換為 Base64 格式，適用於資料傳輸與儲存</div>
+                        </div>
+                    </li>
+                    
+                    <li class="feature-item">
+                        <div class="feature-icon">🔓</div>
+                        <div class="feature-text">
+                            <div class="feature-name">Base64 解碼</div>
+                            <div class="feature-desc">將 Base64 編碼還原為原始文字內容</div>
+                        </div>
+                    </li>
+                    
+                    <li class="feature-item">
+                        <div class="feature-icon">🎨</div>
+                        <div class="feature-text">
+                            <div class="feature-name">Base58 支援</div>
+                            <div class="feature-desc">支援 Base58 編碼，常用於加密貨幣和區塊鏈應用</div>
+                        </div>
+                    </li>
+                    
+                    <li class="feature-item">
+                        <div class="feature-icon">🌍</div>
+                        <div class="feature-text">
+                            <div class="feature-name">Unicode 支援</div>
+                            <div class="feature-desc">完整支援中文、表情符號等 Unicode 字元</div>
+                        </div>
+                    </li>
+                    
+                    <li class="feature-item">
+                        <div class="feature-icon">⚡</div>
+                        <div class="feature-text">
+                            <div class="feature-name">即時轉換</div>
+                            <div class="feature-desc">輸入後立即顯示轉換結果，操作流暢</div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- 螢幕截圖 2: 進制轉換功能 -->
+    <div class="screenshot-page" id="page2" style="display: none;">
+        <div class="page-header">
+            <div class="page-title">🔐 Base Encoder</div>
+            <div class="page-subtitle">專業的編碼解碼與進制轉換工具</div>
+        </div>
+        <div class="page-content">
+            <div class="popup-demo">
+                <div class="popup-header">🔐 Base Encoder</div>
+                <div class="popup-tabs">
+                    <div class="tab">編碼/解碼</div>
+                    <div class="tab active">進制轉換</div>
+                </div>
+                <div class="popup-body">
+                    <div class="form-group">
+                        <label class="form-label">來源進制</label>
+                        <select class="form-control">
+                            <option>36進制</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">目標進制</label>
+                        <select class="form-control">
+                            <option>10進制</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">輸入數值</label>
+                        <input type="text" class="form-control" value="Z1K9">
+                    </div>
+                    
+                    <div style="background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 4px; padding: 12px; margin: 15px 0; font-size: 13px;">
+                        <div><strong>轉換範例：</strong></div>
+                        <div>36進制: Z1K9</div>
+                        <div style="text-align: center; margin: 5px 0; color: #4285f4; font-weight: bold;">⬇️</div>
+                        <div>10進制: 1,799,257</div>
+                    </div>
+                    
+                    <button class="btn-primary">🔄 轉換</button>
+                    
+                    <div class="form-group">
+                        <label class="form-label">轉換結果</label>
+                        <div class="result-display">1799257</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="feature-panel">
+                <div class="feature-title">🔄 進制轉換功能</div>
+                <ul class="feature-list">
+                    <li class="feature-item">
+                        <div class="feature-icon">🔢</div>
+                        <div class="feature-text">
+                            <div class="feature-name">多進制支援</div>
+                            <div class="feature-desc">支援 2 到 36 進制之間的任意轉換</div>
+                        </div>
+                    </li>
+                    
+                    <li class="feature-item">
+                        <div class="feature-icon">🎯</div>
+                        <div class="feature-text">
+                            <div class="feature-name">智慧預設</div>
+                            <div class="feature-desc">預設 36 進制轉 10 進制，符合常用需求</div>
+                        </div>
+                    </li>
+                    
+                    <li class="feature-item">
+                        <div class="feature-icon">🛡️</div>
+                        <div class="feature-text">
+                            <div class="feature-name">錯誤檢測</div>
+                            <div class="feature-desc">自動檢測輸入格式，提供友善錯誤提示</div>
+                        </div>
+                    </li>
+                    
+                    <li class="feature-item">
+                        <div class="feature-icon">📊</div>
+                        <div class="feature-text">
+                            <div class="feature-name">大數值支援</div>
+                            <div class="feature-desc">支援大數值轉換，無長度限制</div>
+                        </div>
+                    </li>
+                    
+                    <li class="feature-item">
+                        <div class="feature-icon">💡</div>
+                        <div class="feature-text">
+                            <div class="feature-name">範例說明</div>
+                            <div class="feature-desc">提供轉換範例，幫助理解進制轉換</div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- 螢幕截圖 3: 功能特色 -->
+    <div class="screenshot-page" id="page3" style="display: none;">
+        <div class="page-header">
+            <div class="page-title">🔐 Base Encoder</div>
+            <div class="page-subtitle">專業的編碼解碼與進制轉換工具</div>
+        </div>
+        <div class="page-content" style="flex-direction: column; align-items: center; text-align: center;">
+            <div class="feature-title" style="margin-bottom: 40px;">✨ 完整功能特色</div>
+            
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 30px; width: 100%; max-width: 1000px;">
+                <div class="feature-item" style="flex-direction: column; text-align: center; padding: 30px;">
+                    <div class="feature-icon" style="font-size: 48px; margin-bottom: 20px;">🔗</div>
+                    <div class="feature-name" style="font-size: 18px; margin-bottom: 10px;">Base64/Base58 編碼</div>
+                    <div class="feature-desc">支援文字與 URL 安全編碼，適用於數據傳輸與儲存</div>
+                </div>
+                
+                <div class="feature-item" style="flex-direction: column; text-align: center; padding: 30px;">
+                    <div class="feature-icon" style="font-size: 48px; margin-bottom: 20px;">🔄</div>
+                    <div class="feature-name" style="font-size: 18px; margin-bottom: 10px;">進制轉換</div>
+                    <div class="feature-desc">支援 2-36 進制之間的數值轉換，滿足各種計算需求</div>
+                </div>
+                
+                <div class="feature-item" style="flex-direction: column; text-align: center; padding: 30px;">
+                    <div class="feature-icon" style="font-size: 48px; margin-bottom: 20px;">💾</div>
+                    <div class="feature-name" style="font-size: 18px; margin-bottom: 10px;">資料持久化</div>
+                    <div class="feature-desc">自動保存輸入內容和設定，重新開啟後可繼續使用</div>
+                </div>
+                
+                <div class="feature-item" style="flex-direction: column; text-align: center; padding: 30px;">
+                    <div class="feature-icon" style="font-size: 48px; margin-bottom: 20px;">🎨</div>
+                    <div class="feature-name" style="font-size: 18px; margin-bottom: 10px;">直觀介面</div>
+                    <div class="feature-desc">分頁式設計，操作簡單，體驗流暢且現代化</div>
+                </div>
+                
+                <div class="feature-item" style="flex-direction: column; text-align: center; padding: 30px;">
+                    <div class="feature-icon" style="font-size: 48px; margin-bottom: 20px;">🔒</div>
+                    <div class="feature-name" style="font-size: 18px; margin-bottom: 10px;">隱私安全</div>
+                    <div class="feature-desc">所有資料在本地處理，保護隱私，不連接外部伺服器</div>
+                </div>
+                
+                <div class="feature-item" style="flex-direction: column; text-align: center; padding: 30px;">
+                    <div class="feature-icon" style="font-size: 48px; margin-bottom: 20px;">⚡</div>
+                    <div class="feature-name" style="font-size: 18px; margin-bottom: 10px;">高效能</div>
+                    <div class="feature-desc">即時轉換，響應迅速，支援大容量資料處理</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showPage1() {
+            document.getElementById('page1').style.display = 'block';
+            document.getElementById('page2').style.display = 'none';
+            document.getElementById('page3').style.display = 'none';
+        }
+        
+        function showPage2() {
+            document.getElementById('page1').style.display = 'none';
+            document.getElementById('page2').style.display = 'block';
+            document.getElementById('page3').style.display = 'none';
+        }
+        
+        function showPage3() {
+            document.getElementById('page1').style.display = 'none';
+            document.getElementById('page2').style.display = 'none';
+            document.getElementById('page3').style.display = 'block';
+        }
+        
+        // 列印樣式
+        window.addEventListener('beforeprint', function() {
+            document.querySelector('.navigation').style.display = 'none';
+            document.querySelector('.instruction-panel').style.display = 'none';
+        });
+        
+        window.addEventListener('afterprint', function() {
+            document.querySelector('.navigation').style.display = 'block';
+            document.querySelector('.instruction-panel').style.display = 'block';
+        });
+    </script>
+</body>
+</html>

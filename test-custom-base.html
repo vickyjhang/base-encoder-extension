@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>自訂進制功能測試</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-case {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .result {
+            margin: 10px 0;
+            padding: 10px;
+            background-color: #f5f5f5;
+            border-radius: 3px;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        button {
+            padding: 8px 16px;
+            margin: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>自訂進制功能測試</h1>
+    
+    <div class="test-case">
+        <h3>測試案例 1：英文字符 - 二進制</h3>
+        <p>原文：<code>A</code></p>
+        <button onclick="testCase1()">執行測試</button>
+        <div id="result1" class="result"></div>
+    </div>
+    
+    <div class="test-case">
+        <h3>測試案例 2：英文字符 - 十六進制</h3>
+        <p>原文：<code>Hello</code></p>
+        <button onclick="testCase2()">執行測試</button>
+        <div id="result2" class="result"></div>
+    </div>
+    
+    <div class="test-case">
+        <h3>測試案例 3：中文字符 - 十進制</h3>
+        <p>原文：<code>你好</code></p>
+        <button onclick="testCase3()">執行測試</button>
+        <div id="result3" class="result"></div>
+    </div>
+    
+    <div class="test-case">
+        <h3>測試案例 4：Emoji - 36進制</h3>
+        <p>原文：<code>😀🌟</code></p>
+        <button onclick="testCase4()">執行測試</button>
+        <div id="result4" class="result"></div>
+    </div>
+    
+    <div class="test-case">
+        <h3>測試案例 5：混合字符 - 8進制</h3>
+        <p>原文：<code>Hello世界!</code></p>
+        <button onclick="testCase5()">執行測試</button>
+        <div id="result5" class="result"></div>
+    </div>
+    
+    <div class="test-case">
+        <h3>自訂測試</h3>
+        <input type="text" id="customText" placeholder="輸入要測試的文字" value="Test文字">
+        <input type="number" id="customBase" min="2" max="36" value="16" placeholder="進制">
+        <button onclick="testCustom()">執行自訂測試</button>
+        <div id="resultCustom" class="result"></div>
+    </div>
+    
+    <script src="src/utils/encoders.js"></script>
+    <script>
+        function runTest(text, base, resultId) {
+            try {
+                console.log(`測試：${text} (Base ${base})`);
+                
+                // 編碼
+                const encoded = customBaseEncode(text, base);
+                console.log(`編碼結果：${encoded}`);
+                
+                // 解碼
+                const decoded = customBaseDecode(encoded, base);
+                console.log(`解碼結果：${decoded}`);
+                
+                // 驗證
+                const isMatch = text === decoded;
+                console.log(`是否一致：${isMatch}`);
+                
+                const resultDiv = document.getElementById(resultId);
+                resultDiv.innerHTML = `
+                    <strong>編碼結果：</strong>${encoded}<br>
+                    <strong>解碼結果：</strong>${decoded}<br>
+                    <strong>驗證：</strong>${isMatch ? '✅ 成功' : '❌ 失敗'}
+                `;
+                resultDiv.className = isMatch ? 'result success' : 'result error';
+                
+            } catch (error) {
+                console.error(`測試失敗：${error.message}`);
+                const resultDiv = document.getElementById(resultId);
+                resultDiv.innerHTML = `<strong>錯誤：</strong>${error.message}`;
+                resultDiv.className = 'result error';
+            }
+        }
+        
+        function testCase1() {
+            runTest('A', 2, 'result1');
+        }
+        
+        function testCase2() {
+            runTest('Hello', 16, 'result2');
+        }
+        
+        function testCase3() {
+            runTest('你好', 10, 'result3');
+        }
+        
+        function testCase4() {
+            runTest('😀🌟', 36, 'result4');
+        }
+        
+        function testCase5() {
+            runTest('Hello世界!', 8, 'result5');
+        }
+        
+        function testCustom() {
+            const text = document.getElementById('customText').value;
+            const base = parseInt(document.getElementById('customBase').value);
+            
+            if (!text) {
+                alert('請輸入要測試的文字');
+                return;
+            }
+            
+            if (isNaN(base) || base < 2 || base > 36) {
+                alert('進制必須在 2 到 36 之間');
+                return;
+            }
+            
+            runTest(text, base, 'resultCustom');
+        }
+        
+        // 頁面載入時執行所有測試
+        window.addEventListener('load', function() {
+            console.log('=== 自動執行所有測試案例 ===');
+            setTimeout(() => testCase1(), 100);
+            setTimeout(() => testCase2(), 200);
+            setTimeout(() => testCase3(), 300);
+            setTimeout(() => testCase4(), 400);
+            setTimeout(() => testCase5(), 500);
+        });
+    </script>
+</body>
+</html>

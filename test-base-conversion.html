@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>進制轉換驗證測試</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .result {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .test-input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            padding: 10px 20px;
+            background: #007cba;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #005a87;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧮 進制轉換驗證測試</h1>
+    
+    <div class="test-container">
+        <h3>預設測試案例</h3>
+        <button onclick="runPresetTests()">執行預設測試</button>
+        <div id="preset-results"></div>
+    </div>
+    
+    <div class="test-container">
+        <h3>自訂進制轉換測試</h3>
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+            <div>
+                <label>輸入數字:</label>
+                <input type="text" id="input-number" class="test-input" value="8k2n0" placeholder="輸入數字">
+            </div>
+            <div>
+                <label>來源進制:</label>
+                <input type="number" id="from-base" class="test-input" min="2" max="36" value="33" placeholder="來源進制">
+            </div>
+            <div>
+                <label>目標進制:</label>
+                <input type="number" id="to-base" class="test-input" min="2" max="36" value="10" placeholder="目標進制">
+            </div>
+        </div>
+        <button onclick="testCustomConversion()">轉換</button>
+        <div id="custom-results"></div>
+    </div>
+    
+    <div class="test-container">
+        <h3>字符編碼模式測試</h3>
+        <p>這個模式將文字字符轉換為其 Unicode 編碼，然後轉為指定進制</p>
+        <input type="text" id="text-input" class="test-input" value="Hello" placeholder="輸入文字">
+        <input type="number" id="text-base" class="test-input" min="2" max="36" value="16" placeholder="目標進制">
+        <button onclick="testTextEncoding()">編碼文字</button>
+        <button onclick="testTextDecoding()">解碼文字</button>
+        <div id="text-results"></div>
+    </div>
+    
+    <script src="src/utils/encoders.js"></script>
+    <script>
+        function runPresetTests() {
+            const resultsDiv = document.getElementById('preset-results');
+            let html = '<h4>測試結果:</h4>';
+            
+            const testCases = [
+                { input: "8k2n0", fromBase: 33, toBase: 10, expected: "14373468" },
+                { input: "FF", fromBase: 16, toBase: 10, expected: "255" },
+                { input: "255", fromBase: 10, toBase: 16, expected: "FF" },
+                { input: "1010", fromBase: 2, toBase: 10, expected: "10" },
+                { input: "10", fromBase: 10, toBase: 2, expected: "1010" },
+                { input: "Z", fromBase: 36, toBase: 10, expected: "35" },
+            ];
+            
+            testCases.forEach((testCase, index) => {
+                try {
+                    const result = baseConvert(testCase.input, testCase.fromBase, testCase.toBase);
+                    const isCorrect = result === testCase.expected;
+                    const status = isCorrect ? 'success' : 'error';
+                    const statusText = isCorrect ? '✅ 通過' : '❌ 失敗';
+                    
+                    html += `
+                        <div class="result ${status}">
+                            <strong>測試 ${index + 1}:</strong> ${testCase.input} (${testCase.fromBase}進制) → ${testCase.toBase}進制<br>
+                            <strong>預期:</strong> ${testCase.expected}<br>
+                            <strong>實際:</strong> ${result}<br>
+                            <strong>狀態:</strong> ${statusText}
+                        </div>
+                    `;
+                } catch (error) {
+                    html += `
+                        <div class="result error">
+                            <strong>測試 ${index + 1}:</strong> ${testCase.input} (${testCase.fromBase}進制) → ${testCase.toBase}進制<br>
+                            <strong>錯誤:</strong> ${error.message}
+                        </div>
+                    `;
+                }
+            });
+            
+            resultsDiv.innerHTML = html;
+        }
+        
+        function testCustomConversion() {
+            const input = document.getElementById('input-number').value;
+            const fromBase = parseInt(document.getElementById('from-base').value);
+            const toBase = parseInt(document.getElementById('to-base').value);
+            const resultsDiv = document.getElementById('custom-results');
+            
+            try {
+                const result = baseConvert(input, fromBase, toBase);
+                resultsDiv.innerHTML = `
+                    <div class="result success">
+                        <strong>轉換結果:</strong><br>
+                        ${input} (${fromBase}進制) = ${result} (${toBase}進制)
+                    </div>
+                `;
+            } catch (error) {
+                resultsDiv.innerHTML = `
+                    <div class="result error">
+                        <strong>轉換錯誤:</strong> ${error.message}
+                    </div>
+                `;
+            }
+        }
+        
+        function testTextEncoding() {
+            const input = document.getElementById('text-input').value;
+            const base = parseInt(document.getElementById('text-base').value);
+            const resultsDiv = document.getElementById('text-results');
+            
+            try {
+                const result = customBaseEncode(input, base);
+                resultsDiv.innerHTML = `
+                    <div class="result success">
+                        <strong>文字編碼結果:</strong><br>
+                        "${input}" → ${result} (Base${base})
+                    </div>
+                `;
+            } catch (error) {
+                resultsDiv.innerHTML = `
+                    <div class="result error">
+                        <strong>編碼錯誤:</strong> ${error.message}
+                    </div>
+                `;
+            }
+        }
+        
+        function testTextDecoding() {
+            const input = document.getElementById('text-input').value;
+            const base = parseInt(document.getElementById('text-base').value);
+            const resultsDiv = document.getElementById('text-results');
+            
+            try {
+                // 假設輸入框中是編碼後的結果
+                const result = customBaseDecode(input, base);
+                resultsDiv.innerHTML = `
+                    <div class="result success">
+                        <strong>文字解碼結果:</strong><br>
+                        ${input} (Base${base}) → "${result}"
+                    </div>
+                `;
+            } catch (error) {
+                resultsDiv.innerHTML = `
+                    <div class="result error">
+                        <strong>解碼錯誤:</strong> ${error.message}
+                    </div>
+                `;
+            }
+        }
+        
+        // 頁面載入時自動執行測試
+        window.addEventListener('load', function() {
+            console.log('檢查函數載入狀態:', {
+                baseConvert: typeof baseConvert,
+                customBaseEncode: typeof customBaseEncode,
+                customBaseDecode: typeof customBaseDecode
+            });
+            
+            // 自動執行預設測試
+            setTimeout(runPresetTests, 100);
+        });
+    </script>
+</body>
+</html>

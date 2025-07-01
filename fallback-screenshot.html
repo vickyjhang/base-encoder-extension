@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Base Encoder - 備用螢幕截圖頁面</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f0f2f5;
+        }
+        
+        .page-container {
+            max-width: 1280px;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #4285f4, #34a853);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 36px;
+            font-weight: 600;
+        }
+        
+        .header p {
+            margin: 10px 0 0 0;
+            font-size: 18px;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .feature-card {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 12px;
+            text-align: center;
+            border-left: 4px solid #4285f4;
+        }
+        
+        .feature-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+            display: block;
+        }
+        
+        .feature-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        
+        .feature-desc {
+            font-size: 14px;
+            color: #6c757d;
+            line-height: 1.5;
+        }
+        
+        .demo-section {
+            background: #fff;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 30px;
+            margin: 30px 0;
+        }
+        
+        .demo-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        .input-label {
+            display: block;
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 8px;
+        }
+        
+        .input-field {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #ced4da;
+            border-radius: 8px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        
+        .output-field {
+            background: #f8f9fa;
+            border: 2px solid #dee2e6;
+            color: #495057;
+            font-family: 'Consolas', monospace;
+        }
+        
+        .button {
+            background: #4285f4;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 5px;
+        }
+        
+        .button:hover {
+            background: #3367d6;
+        }
+        
+        .instruction-box {
+            background: #e3f2fd;
+            border: 1px solid #90caf9;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 30px 0;
+        }
+        
+        .instruction-title {
+            font-weight: 600;
+            color: #1565c0;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+        
+        .instruction-list {
+            margin: 0;
+            padding-left: 20px;
+            color: #1976d2;
+        }
+        
+        .instruction-list li {
+            margin-bottom: 8px;
+        }
+        
+        .screenshot-note {
+            background: #fff8e1;
+            border: 1px solid #ffcc02;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .download-area {
+            text-align: center;
+            padding: 30px;
+            background: #f8f9fa;
+            border-top: 1px solid #e9ecef;
+        }
+        
+        .download-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 10px;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .download-btn:hover {
+            background: #218838;
+        }
+        
+        .download-btn.manual {
+            background: #6c757d;
+        }
+        
+        .download-btn.manual:hover {
+            background: #5a6268;
+        }
+    </style>
+</head>
+<body>
+    <div class="page-container">
+        <div class="header">
+            <h1>🔐 Base Encoder</h1>
+            <p>強大的編碼解碼工具 - Chrome 擴充功能</p>
+        </div>
+        
+        <div class="content">
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <span class="feature-icon">🔗</span>
+                    <div class="feature-title">Base64/Base58 編碼</div>
+                    <div class="feature-desc">支援文字與 URL 安全編碼，適用於數據傳輸與儲存</div>
+                </div>
+                
+                <div class="feature-card" style="border-left-color: #34a853;">
+                    <span class="feature-icon">🔢</span>
+                    <div class="feature-title">進制轉換</div>
+                    <div class="feature-desc">支援 2-36 進制之間的數值轉換，滿足各種計算需求</div>
+                </div>
+                
+                <div class="feature-card" style="border-left-color: #fd7e14;">
+                    <span class="feature-icon">💾</span>
+                    <div class="feature-title">資料持久化</div>
+                    <div class="feature-desc">自動保存輸入內容和設定，重新開啟後可繼續使用</div>
+                </div>
+            </div>
+            
+            <div class="demo-section">
+                <div class="demo-title">
+                    <span>🎯</span>
+                    Base64 編碼示範
+                </div>
+                
+                <div class="input-group">
+                    <label class="input-label">輸入文字：</label>
+                    <input type="text" class="input-field" value="Hello World! 你好世界！" readonly>
+                </div>
+                
+                <div class="input-group">
+                    <label class="input-label">Base64 編碼結果：</label>
+                    <input type="text" class="input-field output-field" value="SGVsbG8gV29ybGQhIOWkp+WlveS4lueVjO+8gQ==" readonly>
+                </div>
+                
+                <button class="button">🔐 編碼</button>
+                <button class="button">🔓 解碼</button>
+                <button class="button">📋 複製</button>
+            </div>
+            
+            <div class="demo-section">
+                <div class="demo-title">
+                    <span>🔢</span>
+                    進制轉換示範
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div>
+                        <div class="input-group">
+                            <label class="input-label">來源進制：</label>
+                            <select class="input-field">
+                                <option>10 (十進制)</option>
+                            </select>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label class="input-label">輸入數值：</label>
+                            <input type="text" class="input-field" value="255" readonly>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <div class="input-group">
+                            <label class="input-label">目標進制：</label>
+                            <select class="input-field">
+                                <option>16 (十六進制)</option>
+                            </select>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label class="input-label">轉換結果：</label>
+                            <input type="text" class="input-field output-field" value="FF" readonly>
+                        </div>
+                    </div>
+                </div>
+                
+                <button class="button">🔄 轉換</button>
+                <button class="button">📋 複製結果</button>
+            </div>
+        </div>
+        
+        <div class="screenshot-note">
+            <strong>📸 此頁面已最佳化為 1280x800 螢幕截圖尺寸</strong><br>
+            請使用系統截圖工具截取整個頁面，或使用下方的下載功能
+        </div>
+        
+        <div class="download-area">
+            <div class="instruction-box">
+                <div class="instruction-title">📋 螢幕截圖說明</div>
+                <ol class="instruction-list">
+                    <li>此頁面已針對 Chrome Web Store 要求進行最佳化</li>
+                    <li>建議使用瀏覽器縮放 100% 進行截圖</li>
+                    <li>截圖尺寸：1280x800 像素</li>
+                    <li>儲存格式：PNG 或 JPEG，檔案大小 < 2MB</li>
+                    <li>確保背景為純白色，無透明層</li>
+                </ol>
+            </div>
+            
+            <button class="download-btn manual" onclick="showScreenshotGuide()">
+                📖 查看截圖指南
+            </button>
+            
+            <button class="download-btn" onclick="openMainGenerator()">
+                🚀 開啟主要截圖生成器
+            </button>
+        </div>
+    </div>
+
+    <script>
+        function showScreenshotGuide() {
+            alert(`📸 手動截圖指南
+
+步驟 1：準備瀏覽器
+• 將瀏覽器縮放設定為 100%
+• 確保視窗尺寸足夠顯示完整頁面
+
+步驟 2：截圖方式
+macOS: ⌘ + Shift + 4 然後拖拽選取
+Windows: Win + Shift + S 或使用截圖工具
+Linux: PrtScn 或 Shift + PrtScn
+
+步驟 3：編輯調整
+• 裁切至 1280x800 像素
+• 確保背景為純白色
+• 儲存為 PNG 或 JPEG 格式
+
+步驟 4：品質檢查
+• 檔案大小 < 2MB
+• 文字清晰可讀
+• 無透明層或透明背景
+
+建議工具：
+• macOS: 預覽程式、Pixelmator Pro
+• Windows: 小畫家、GIMP
+• 線上工具: Canva、Photopea`);
+        }
+        
+        function openMainGenerator() {
+            window.open('screenshot-generator.html', '_blank');
+        }
+        
+        // 頁面載入效果
+        document.addEventListener('DOMContentLoaded', function() {
+            const cards = document.querySelectorAll('.feature-card');
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                
+                setTimeout(() => {
+                    card.style.transition = 'all 0.5s ease';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 100);
+            });
+        });
+    </script>
+</body>
+</html>

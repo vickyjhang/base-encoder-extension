@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>32進制驗證</title>
+    <style>
+        body { font-family: monospace; padding: 20px; }
+        .calculation { background: #f0f0f0; padding: 10px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <h1>驗證 "8k2n0" 從 32 進制轉為 10 進制</h1>
+    
+    <div id="result"></div>
+    
+    <script>
+        function calculateBase32To10(input) {
+            const base = 32;
+            let result = 0;
+            let calculations = [];
+            
+            console.log(`計算 "${input}" 從 ${base} 進制轉為 10 進制：`);
+            
+            // 從右到左處理每個字符
+            for (let i = input.length - 1; i >= 0; i--) {
+                const char = input[i].toLowerCase();
+                let digitValue;
+                
+                if (char >= '0' && char <= '9') {
+                    digitValue = char.charCodeAt(0) - '0'.charCodeAt(0);
+                } else if (char >= 'a' && char <= 'z') {
+                    digitValue = char.charCodeAt(0) - 'a'.charCodeAt(0) + 10;
+                }
+                
+                const position = input.length - 1 - i;
+                const placeValue = Math.pow(base, position);
+                const contribution = digitValue * placeValue;
+                
+                const step = `位置 ${position}: '${char}' = ${digitValue} × ${base}^${position} = ${digitValue} × ${placeValue} = ${contribution}`;
+                calculations.push(step);
+                console.log(step);
+                
+                result += contribution;
+            }
+            
+            return { result, calculations };
+        }
+        
+        // 計算
+        const input = "8k2n0";
+        const { result, calculations } = calculateBase32To10(input);
+        
+        // 顯示結果
+        const resultDiv = document.getElementById('result');
+        resultDiv.innerHTML = `
+            <div class="calculation">
+                <h3>計算過程：</h3>
+                ${calculations.map(calc => `<div>${calc}</div>`).join('')}
+            </div>
+            <div class="calculation">
+                <h3>結果：</h3>
+                <div><strong>總和: ${result}</strong></div>
+                <div>驗證: ${result} === 14373468 ? <strong>${result === 14373468 ? '✅ 正確' : '❌ 錯誤'}</strong></div>
+            </div>
+        `;
+        
+        console.log('總和:', result);
+        console.log('驗證:', result === 14373468);
+    </script>
+</body>
+</html>

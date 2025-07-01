@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>最終進制轉換測試</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-result {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .success { background-color: #d4edda; color: #155724; }
+        .error { background-color: #f8d7da; color: #721c24; }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #0056b3; }
+        input, select {
+            padding: 8px;
+            margin: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>進制轉換功能測試</h1>
+        
+        <h3>預設值測試</h3>
+        <div>
+            <label>來源進制: <input type="number" id="fromBase" value="36" min="2" max="36"></label>
+            <label>目標進制: <input type="number" id="toBase" value="10" min="2" max="36"></label>
+        </div>
+        <div>
+            <label>輸入數字: <input type="text" id="input" placeholder="例如: ZZ"></label>
+            <button onclick="testConversion()">轉換</button>
+            <button onclick="resetDefaults()">重設預設值</button>
+        </div>
+        <div id="result" class="test-result"></div>
+        
+        <h3>自動測試案例</h3>
+        <button onclick="runAllTests()">執行所有測試</button>
+        <div id="testResults"></div>
+    </div>
+
+    <script src="src/utils/encoders.js"></script>
+    <script>
+        function testConversion() {
+            const fromBase = parseInt(document.getElementById('fromBase').value);
+            const toBase = parseInt(document.getElementById('toBase').value);
+            const input = document.getElementById('input').value.trim();
+            const resultDiv = document.getElementById('result');
+            
+            if (!input) {
+                resultDiv.innerHTML = '<div class="error">請輸入要轉換的數字</div>';
+                return;
+            }
+            
+            try {
+                const result = baseConvert(input, fromBase, toBase);
+                resultDiv.innerHTML = `<div class="success">${input} (${fromBase}進制) = ${result} (${toBase}進制)</div>`;
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">錯誤: ${error.message}</div>`;
+            }
+        }
+        
+        function resetDefaults() {
+            document.getElementById('fromBase').value = 36;
+            document.getElementById('toBase').value = 10;
+            document.getElementById('input').placeholder = "例如: ZZ";
+            document.getElementById('result').innerHTML = '<div class="success">已重設為預設值：36進制 → 10進制</div>';
+        }
+        
+        function runAllTests() {
+            const tests = [
+                // 36進制到10進制 (預設值測試)
+                { input: 'ZZ', from: 36, to: 10, expected: '1295' },
+                { input: 'Z', from: 36, to: 10, expected: '35' },
+                { input: '10', from: 36, to: 10, expected: '36' },
+                
+                // 其他常見轉換
+                { input: 'FF', from: 16, to: 10, expected: '255' },
+                { input: '255', from: 10, to: 16, expected: 'FF' },
+                { input: '1010', from: 2, to: 10, expected: '10' },
+                { input: '10', from: 10, to: 2, expected: '1010' },
+                
+                // 大進制轉換
+                { input: 'ABC', from: 36, to: 10, expected: '13368' },
+                { input: '13368', from: 10, to: 36, expected: 'ABC' },
+            ];
+            
+            const resultsDiv = document.getElementById('testResults');
+            let html = '<h4>測試結果:</h4>';
+            let passed = 0;
+            let total = tests.length;
+            
+            tests.forEach((test, index) => {
+                try {
+                    const result = baseConvert(test.input, test.from, test.to);
+                    const success = result === test.expected;
+                    
+                    if (success) passed++;
+                    
+                    html += `<div class="${success ? 'success' : 'error'}">
+                        測試 ${index + 1}: ${test.input} (${test.from}進制) → ${test.to}進制
+                        <br>預期: ${test.expected}, 實際: ${result} ${success ? '✓' : '✗'}
+                    </div>`;
+                } catch (error) {
+                    html += `<div class="error">
+                        測試 ${index + 1}: ${test.input} (${test.from}進制) → ${test.to}進制
+                        <br>錯誤: ${error.message} ✗
+                    </div>`;
+                }
+            });
+            
+            html += `<div class="${passed === total ? 'success' : 'error'}">
+                <strong>總結: ${passed}/${total} 個測試通過</strong>
+            </div>`;
+            
+            resultsDiv.innerHTML = html;
+        }
+        
+        // 監聽來源進制變化，更新輸入提示
+        document.getElementById('fromBase').addEventListener('change', function() {
+            const base = parseInt(this.value);
+            const inputField = document.getElementById('input');
+            
+            if (base === 2) inputField.placeholder = "例如: 1010101";
+            else if (base === 8) inputField.placeholder = "例如: 777";
+            else if (base === 10) inputField.placeholder = "例如: 255";
+            else if (base === 16) inputField.placeholder = "例如: FF";
+            else if (base === 32) inputField.placeholder = "例如: 8k2n0";
+            else if (base === 36) inputField.placeholder = "例如: ZZ";
+            else inputField.placeholder = "輸入要轉換的數字";
+        });
+        
+        // 初始化
+        window.onload = function() {
+            console.log('測試頁面已載入，進制轉換功能可用');
+            resetDefaults();
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>專業 Chrome 擴充功能圖示</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .icon-container {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        .icon-item {
+            text-align: center;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .icon-item h3 {
+            margin: 0 0 15px 0;
+            color: #333;
+        }
+        .download-all {
+            text-align: center;
+            margin: 30px 0;
+        }
+        .download-btn {
+            background: #4285f4;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+        .download-btn:hover {
+            background: #3367d6;
+        }
+        .instructions {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <h1>🎨 Base Encoder 專業圖示</h1>
+    
+    <div class="instructions">
+        <h3>📋 使用說明</h3>
+        <ol>
+            <li>右鍵點擊下方的 SVG 圖示</li>
+            <li>選擇「另存圖片」或「Save image as」</li>
+            <li>儲存為對應的檔名 (icon16.svg, icon48.svg, icon128.svg)</li>
+            <li>使用線上工具將 SVG 轉換為 PNG，或使用下方的轉換功能</li>
+            <li>替換 icons/ 目錄中的檔案</li>
+        </ol>
+        <p><strong>提示：</strong>SVG 圖示可以在任何尺寸下保持清晰，非常適合 Chrome 擴充功能。</p>
+    </div>
+
+    <div class="icon-container">
+        <!-- 16x16 圖示 -->
+        <div class="icon-item">
+            <h3>16x16 px</h3>
+            <svg width="64" height="64" viewBox="0 0 16 16" style="border: 1px solid #ddd;">
+                <defs>
+                    <linearGradient id="grad16" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" style="stop-color:#4285f4;stop-opacity:1" />
+                        <stop offset="100%" style="stop-color:#34a853;stop-opacity:1" />
+                    </linearGradient>
+                </defs>
+                <rect width="16" height="16" rx="3" fill="url(#grad16)"/>
+                <text x="8" y="11" font-family="Arial, sans-serif" font-size="6" font-weight="bold" fill="white" text-anchor="middle">64</text>
+            </svg>
+            <br>
+            <button class="download-btn" onclick="downloadSVG('icon16', 16)">下載 SVG</button>
+        </div>
+
+        <!-- 48x48 圖示 -->
+        <div class="icon-item">
+            <h3>48x48 px</h3>
+            <svg width="96" height="96" viewBox="0 0 48 48" style="border: 1px solid #ddd;">
+                <defs>
+                    <linearGradient id="grad48" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" style="stop-color:#4285f4;stop-opacity:1" />
+                        <stop offset="100%" style="stop-color:#34a853;stop-opacity:1" />
+                    </linearGradient>
+                </defs>
+                <rect width="48" height="48" rx="8" fill="url(#grad48)"/>
+                <text x="24" y="20" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="white" text-anchor="middle">B64</text>
+                <path d="M15 30 L33 30 M30 27 L33 30 L30 33" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="18" cy="36" r="1.5" fill="white"/>
+                <circle cx="24" cy="36" r="1.5" fill="white"/>
+                <circle cx="30" cy="36" r="1.5" fill="white"/>
+            </svg>
+            <br>
+            <button class="download-btn" onclick="downloadSVG('icon48', 48)">下載 SVG</button>
+        </div>
+
+        <!-- 128x128 圖示 -->
+        <div class="icon-item">
+            <h3>128x128 px</h3>
+            <svg width="128" height="128" viewBox="0 0 128 128" style="border: 1px solid #ddd;">
+                <defs>
+                    <linearGradient id="grad128" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" style="stop-color:#4285f4;stop-opacity:1" />
+                        <stop offset="100%" style="stop-color:#34a853;stop-opacity:1" />
+                    </linearGradient>
+                </defs>
+                <rect width="128" height="128" rx="20" fill="url(#grad128)"/>
+                
+                <!-- 主標題 -->
+                <text x="64" y="45" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="white" text-anchor="middle">BASE</text>
+                <text x="64" y="70" font-family="Arial, sans-serif" font-size="28" font-weight="bold" fill="white" text-anchor="middle">64</text>
+                
+                <!-- 轉換箭頭 -->
+                <path d="M30 85 L98 85 M90 78 L98 85 L90 92" stroke="white" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                
+                <!-- 編碼點 -->
+                <circle cx="40" cy="105" r="3" fill="white"/>
+                <circle cx="55" cy="105" r="3" fill="white"/>
+                <circle cx="70" cy="105" r="3" fill="white"/>
+                <circle cx="85" cy="105" r="3" fill="white"/>
+                
+                <!-- 裝飾性編碼符號 -->
+                <text x="25" y="25" font-family="monospace" font-size="8" fill="rgba(255,255,255,0.7)">01</text>
+                <text x="95" y="25" font-family="monospace" font-size="8" fill="rgba(255,255,255,0.7)">AB</text>
+            </svg>
+            <br>
+            <button class="download-btn" onclick="downloadSVG('icon128', 128)">下載 SVG</button>
+        </div>
+    </div>
+
+    <div class="download-all">
+        <button class="download-btn" onclick="downloadAllSVG()" style="background: #ea4335; font-size: 18px; padding: 15px 30px;">📦 下載所有 SVG 圖示</button>
+    </div>
+
+    <!-- SVG 轉 PNG 工具 -->
+    <div class="instructions">
+        <h3>🔄 SVG 轉 PNG 工具</h3>
+        <p>上傳 SVG 檔案並轉換為高品質 PNG：</p>
+        <input type="file" id="svgFile" accept=".svg" style="margin: 10px 0;">
+        <br>
+        <label>輸出尺寸: 
+            <select id="outputSize">
+                <option value="16">16x16</option>
+                <option value="48">48x48</option>
+                <option value="128">128x128</option>
+                <option value="256">256x256</option>
+            </select>
+        </label>
+        <br>
+        <button class="download-btn" onclick="convertSVGtoPNG()" style="background: #ff9800; margin-top: 10px;">轉換為 PNG</button>
+        <br>
+        <canvas id="conversionCanvas" style="display: none;"></canvas>
+    </div>
+
+    <script>
+        function downloadSVG(iconId, size) {
+            const svgElement = document.querySelector(`[viewBox="0 0 ${size} ${size}"]`);
+            const svgData = new XMLSerializer().serializeToString(svgElement);
+            const svgBlob = new Blob([svgData], {type: 'image/svg+xml;charset=utf-8'});
+            const svgUrl = URL.createObjectURL(svgBlob);
+            
+            const downloadLink = document.createElement('a');
+            downloadLink.href = svgUrl;
+            downloadLink.download = `${iconId}.svg`;
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+            URL.revokeObjectURL(svgUrl);
+        }
+
+        function downloadAllSVG() {
+            setTimeout(() => downloadSVG('icon16', 16), 100);
+            setTimeout(() => downloadSVG('icon48', 48), 200);
+            setTimeout(() => downloadSVG('icon128', 128), 300);
+        }
+
+        function convertSVGtoPNG() {
+            const fileInput = document.getElementById('svgFile');
+            const outputSize = parseInt(document.getElementById('outputSize').value);
+            
+            if (!fileInput.files[0]) {
+                alert('請先選擇 SVG 檔案');
+                return;
+            }
+
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                const svgData = e.target.result;
+                const canvas = document.getElementById('conversionCanvas');
+                const ctx = canvas.getContext('2d');
+                
+                canvas.width = outputSize;
+                canvas.height = outputSize;
+                
+                const img = new Image();
+                img.onload = function() {
+                    ctx.drawImage(img, 0, 0, outputSize, outputSize);
+                    
+                    // 下載 PNG
+                    canvas.toBlob(function(blob) {
+                        const url = URL.createObjectURL(blob);
+                        const downloadLink = document.createElement('a');
+                        downloadLink.href = url;
+                        downloadLink.download = `icon${outputSize}.png`;
+                        document.body.appendChild(downloadLink);
+                        downloadLink.click();
+                        document.body.removeChild(downloadLink);
+                        URL.revokeObjectURL(url);
+                    }, 'image/png');
+                };
+                
+                const svgBlob = new Blob([svgData], {type: 'image/svg+xml;charset=utf-8'});
+                const url = URL.createObjectURL(svgBlob);
+                img.src = url;
+            };
+            
+            reader.readAsText(file);
+        }
+    </script>
+</body>
+</html>

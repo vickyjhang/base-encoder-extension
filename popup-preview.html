@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>新版 Popup 介面預覽</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f0f0f0;
+        }
+        .preview-container {
+            max-width: 400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .preview-header {
+            background: #007cba;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-weight: bold;
+        }
+    </style>
+    <link rel="stylesheet" href="src/popup/popup.css">
+</head>
+<body>
+    <h1 style="text-align: center; color: #333;">🎨 新版 Popup 介面預覽</h1>
+    
+    <div class="preview-container">
+        <div class="preview-header">Chrome 擴充功能預覽</div>
+        
+        <div class="container">
+            <h1>編碼/解碼器</h1>
+            
+            <!-- 功能選擇標籤 -->
+            <div class="tab-container">
+                <button class="tab-button active" id="encode-tab">編碼/解碼</button>
+                <button class="tab-button" id="convert-tab">進制轉換</button>
+            </div>
+            
+            <!-- 編碼/解碼區塊 -->
+            <div class="tab-content active" id="encode-section">
+                <div class="mode-selection">
+                    <label>
+                        <input type="radio" name="mode" value="encode" checked>
+                        編碼
+                    </label>
+                    <label>
+                        <input type="radio" name="mode" value="decode">
+                        解碼
+                    </label>
+                </div>
+                
+                <textarea id="input" placeholder="輸入要處理的內容">Hello 世界 😀</textarea>
+                
+                <div class="format-selection">
+                    <label>選擇格式:</label>
+                    <select id="format">
+                        <option value="base64">Base64</option>
+                        <option value="base58">Base58</option>
+                    </select>
+                </div>
+                
+                <div class="action-button">
+                    <button id="process">編碼</button>
+                </div>
+                
+                <h2>結果</h2>
+                <textarea id="output" placeholder="編碼結果" readonly>SGVsbG8g5LiW55WMIPCfmIA=</textarea>
+            </div>
+            
+            <!-- 進制轉換區塊 -->
+            <div class="tab-content" id="convert-section">
+                <div class="convert-input-group">
+                    <div class="base-input-row">
+                        <div class="base-input-half">
+                            <label>來源進制 (2-36):</label>
+                            <input type="number" id="fromBase" min="2" max="36" value="36" placeholder="來源進制">
+                        </div>
+                        <div class="base-input-half">
+                            <label>目標進制 (2-36):</label>
+                            <input type="number" id="toBase" min="2" max="36" value="10" placeholder="目標進制">
+                        </div>
+                    </div>
+                    
+                    <label>輸入數字:</label>
+                    <textarea id="convertInput" placeholder="例如: ZZ" rows="3">ZZ</textarea>
+                    
+                    <div class="action-button">
+                        <button id="convertButton">轉換</button>
+                        <button id="clearButton" class="secondary">清除</button>
+                    </div>
+                </div>
+                
+                <h2>轉換結果</h2>
+                <textarea id="convertOutput" placeholder="轉換結果" readonly>ZZ (36進制) = 1295 (10進制)</textarea>
+                
+                <div class="base-reference">
+                    <small>
+                        <strong>進制參考:</strong> 
+                        2進制(0,1) | 8進制(0-7) | 10進制(0-9) | 16進制(0-9,A-F) | 36進制(0-9,A-Z)
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div style="text-align: center; margin-top: 20px; color: #666;">
+        <p><strong>主要改進：</strong></p>
+        <ul style="display: inline-block; text-align: left;">
+            <li>✅ 編碼/解碼和進制轉換完全分離</li>
+            <li>✅ 標籤頁式介面，更清晰的功能劃分</li>
+            <li>✅ 進制轉換支援來源和目標進制設定</li>
+            <li>✅ 更直觀的操作流程</li>
+            <li>✅ 保持 Chrome 擴充功能的緊湊設計</li>
+        </ul>
+    </div>
+    
+    <script src="src/utils/encoders.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // 標籤頁元素
+            const encodeTab = document.getElementById("encode-tab");
+            const convertTab = document.getElementById("convert-tab");
+            const encodeSection = document.getElementById("encode-section");
+            const convertSection = document.getElementById("convert-section");
+
+            // 標籤頁切換功能
+            function switchTab(activeTab, activeSection) {
+                // 移除所有活動狀態
+                document.querySelectorAll('.tab-button').forEach(tab => tab.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(section => section.classList.remove('active'));
+                
+                // 添加活動狀態
+                activeTab.classList.add('active');
+                activeSection.classList.add('active');
+            }
+
+            // 標籤頁事件監聽
+            encodeTab.addEventListener("click", () => switchTab(encodeTab, encodeSection));
+            convertTab.addEventListener("click", () => switchTab(convertTab, convertSection));
+
+            // 編碼/解碼功能
+            const processButton = document.getElementById("process");
+            const inputField = document.getElementById("input");
+            const outputField = document.getElementById("output");
+            const formatSelect = document.getElementById("format");
+            const modeRadios = document.querySelectorAll('input[name="mode"]');
+
+            function updateEncodeInterface() {
+                const selectedMode = document.querySelector('input[name="mode"]:checked').value;
+                const isEncode = selectedMode === "encode";
+                processButton.textContent = isEncode ? "編碼" : "解碼";
+            }
+
+            modeRadios.forEach((radio) => {
+                radio.addEventListener("change", updateEncodeInterface);
+            });
+
+            processButton.addEventListener("click", function () {
+                const inputText = inputField.value.trim();
+                const selectedFormat = formatSelect.value;
+                const selectedMode = document.querySelector('input[name="mode"]:checked').value;
+
+                if (inputText === "") return;
+
+                try {
+                    let result;
+                    if (selectedMode === "encode") {
+                        switch (selectedFormat) {
+                            case "base64":
+                                result = base64Encode(inputText);
+                                break;
+                            case "base58":
+                                result = base58Encode(inputText);
+                                break;
+                        }
+                    } else {
+                        switch (selectedFormat) {
+                            case "base64":
+                                result = base64Decode(inputText);
+                                break;
+                            case "base58":
+                                result = base58Decode(inputText);
+                                break;
+                        }
+                    }
+                    outputField.value = result;
+                    outputField.className = "success";
+                } catch (error) {
+                    outputField.value = `錯誤: ${error.message}`;
+                    outputField.className = "error";
+                }
+            });
+
+            // 進制轉換功能
+            const convertButton = document.getElementById("convertButton");
+            const clearButton = document.getElementById("clearButton");
+            const convertInput = document.getElementById("convertInput");
+            const convertOutput = document.getElementById("convertOutput");
+            const fromBaseInput = document.getElementById("fromBase");
+            const toBaseInput = document.getElementById("toBase");
+
+            convertButton.addEventListener("click", function () {
+                const inputText = convertInput.value.trim();
+                const fromBase = parseInt(fromBaseInput.value);
+                const toBase = parseInt(toBaseInput.value);
+
+                if (inputText === "") return;
+
+                try {
+                    const result = baseConvert(inputText, fromBase, toBase);
+                    convertOutput.value = `${inputText} (${fromBase}進制) = ${result} (${toBase}進制)`;
+                    convertOutput.className = "success";
+                } catch (error) {
+                    convertOutput.value = `錯誤: ${error.message}`;
+                    convertOutput.className = "error";
+                }
+            });
+
+            clearButton.addEventListener("click", function () {
+                convertInput.value = "";
+                convertOutput.value = "";
+                convertOutput.className = "";
+                fromBaseInput.value = "36";
+                toBaseInput.value = "10";
+            });
+
+            // 初始化
+            updateEncodeInterface();
+        });
+    </script>
+</body>
+</html>

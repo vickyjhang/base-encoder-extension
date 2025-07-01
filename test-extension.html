@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Base Encoder 測試頁面</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .test-button {
+            background: #007cba;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            margin: 5px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .test-button:hover {
+            background: #005a87;
+        }
+        .result {
+            background: #f9f9f9;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            word-break: break-all;
+            min-height: 20px;
+        }
+        .success {
+            color: green;
+        }
+        .error {
+            color: red;
+        }
+        .test-case {
+            border-left: 4px solid #007cba;
+            padding-left: 15px;
+            margin: 15px 0;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        h2 {
+            color: #007cba;
+            border-bottom: 2px solid #007cba;
+            padding-bottom: 5px;
+        }
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        .comparison-table th,
+        .comparison-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        .comparison-table th {
+            background-color: #f2f2f2;
+        }
+        .popup-test {
+            border: 2px solid #007cba;
+            background: #e8f4f8;
+        }
+        .base-convert {
+            border: 2px solid #28a745;
+            background: #e8f5e8;
+        }
+        .grid-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        .base-reference {
+            margin-top: 15px;
+            padding: 10px;
+            background: #e9f7ef;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .base-reference h4 {
+            margin: 0 0 8px 0;
+            color: #28a745;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔧 Base Encoder Chrome 擴充功能測試</h1>
+    
+    <div class="test-container popup-test">
+        <h2>📱 Base 編碼/解碼測試</h2>
+        <p>測試 Base64、Base58 編碼與解碼功能：</p>
+        
+        <div class="mode-selection" style="margin-bottom: 15px; text-align: center;">
+            <label style="display: inline-block; margin: 0 15px;">
+                <input type="radio" name="test-mode" value="encode" checked>
+                編碼
+            </label>
+            <label style="display: inline-block; margin: 0 15px;">
+                <input type="radio" name="test-mode" value="decode">
+                解碼
+            </label>
+        </div>
+        
+        <textarea id="popup-input" class="test-input" placeholder="輸入要處理的內容" rows="3">Hello World</textarea>
+        
+        <div style="margin-bottom: 15px;">
+            <label>選擇格式:</label>
+            <select id="popup-format" style="width: 100%; padding: 8px; margin-top: 5px;">
+                <option value="base64">Base64</option>
+                <option value="base58">Base58</option>
+            </select>
+        </div>
+        
+        <div style="text-align: center; margin: 15px 0;">
+            <button id="popup-process" class="test-button">處理</button>
+        </div>
+        
+        <div>
+            <strong>結果：</strong>
+            <div id="popup-output" class="result" style="border: 1px solid #ddd;">點擊處理按鈕進行編碼/解碼</div>
+        </div>
+    </div>
+
+    <div class="test-container base-convert">
+        <h2>🔢 進制轉換測試</h2>
+        <p>測試 2～36 進制之間的數字轉換：</p>
+        
+        <div class="grid-container">
+            <div>
+                <label>來源進制 (2-36):</label>
+                <input type="number" id="from-base" class="test-input" min="2" max="36" value="10" placeholder="輸入來源進制">
+            </div>
+            <div>
+                <label>目標進制 (2-36):</label>
+                <input type="number" id="to-base" class="test-input" min="2" max="36" value="16" placeholder="輸入目標進制">
+            </div>
+        </div>
+        
+        <div style="margin-bottom: 15px;">
+            <label>輸入數字或文字:</label>
+            <input type="text" id="base-input" class="test-input" placeholder="輸入要轉換的數字或文字" value="255">
+        </div>
+        
+        <div style="text-align: center; margin: 15px 0;">
+            <button id="base-convert" class="test-button">轉換</button>
+            <button id="base-clear" class="test-button" style="background: #6c757d;">清除</button>
+        </div>
+        
+        <div>
+            <strong>轉換結果：</strong>
+            <div id="base-output" class="result" style="border: 1px solid #ddd;">點擊轉換按鈕進行進制轉換</div>
+        </div>
+        
+        <div class="base-reference">
+            <h4>常用進制參考：</h4>
+            <p><strong>2進制:</strong> 0,1 | <strong>8進制:</strong> 0-7 | <strong>10進制:</strong> 0-9 | <strong>16進制:</strong> 0-9,A-F | <strong>36進制:</strong> 0-9,A-Z</p>
+        </div>
+    </div>
+
+    <div class="test-container">
+        <h2>🧪 自動化測試案例</h2>
+        <button id="run-all-tests" class="test-button" style="background: #28a745;">執行所有測試</button>
+        <div id="test-results"></div>
+    </div>
+
+    <div class="test-container">
+        <h2>📊 編碼結果比較表</h2>
+        <table class="comparison-table">
+            <thead>
+                <tr>
+                    <th>原始文字</th>
+                    <th>Base64</th>
+                    <th>Base58</th>
+                </tr>
+            </thead>
+            <tbody id="comparison-tbody">
+                <!-- 動態填充 -->
+            </tbody>
+        </table>
+    </div>
+
+    <div class="test-container">
+        <h2>🎯 互動測試區域</h2>
+        <input type="text" id="custom-input" class="test-input" placeholder="輸入自訂文字進行測試" value="測試中文字符">
+        <button id="test-custom" class="test-button">測試自訂輸入</button>
+        <div id="custom-results"></div>
+    </div>
+
+    <script src="src/utils/encoders.js"></script>
+    <script>
+        // 測試案例數據 (包含編碼和解碼)
+        const testCases = [
+            { input: "", expected: "空字串測試", mode: "encode" },
+            { input: "A", expected: "單一字符編碼", mode: "encode" },
+            { input: "Hello", expected: "英文單字編碼", mode: "encode" },
+            { input: "Hello World", expected: "含空格的英文編碼", mode: "encode" },
+            { input: "你好", expected: "中文字符編碼", mode: "encode" },
+            { input: "測試", expected: "中文字符編碼2", mode: "encode" },
+            { input: "Hello 世界", expected: "中英混合編碼", mode: "encode" },
+            { input: "🚀 Emoji 測試", expected: "Emoji字符編碼", mode: "encode" },
+            { input: "SGVsbG8gV29ybGQ=", expected: "Base64解碼測試", mode: "decode", format: "base64" },
+            { input: "5L2g5aW9", expected: "中文Base64解碼測試", mode: "decode", format: "base64" },
+            { input: "JxF12TrwUP45BMd", expected: "Base58解碼測試", mode: "decode", format: "base58" }
+        ];
+
+        // 模擬 popup 功能
+        function setupPopupSimulation() {
+            const inputField = document.getElementById('popup-input');
+            const outputField = document.getElementById('popup-output');
+            const processButton = document.getElementById('popup-process');
+            const formatSelect = document.getElementById('popup-format');
+            const modeRadios = document.querySelectorAll('input[name="test-mode"]');
+
+            // 更新介面文字
+            function updateInterface() {
+                const selectedMode = document.querySelector('input[name="test-mode"]:checked').value;
+                const isEncode = selectedMode === "encode";
+                
+                processButton.textContent = isEncode ? "編碼" : "解碼";
+                inputField.placeholder = isEncode ? "輸入要編碼的內容" : "輸入要解碼的內容";
+            }
+
+            // 監聽模式變更
+            modeRadios.forEach(radio => {
+                radio.addEventListener("change", updateInterface);
+            });
+
+            processButton.addEventListener('click', function() {
+                const inputText = inputField.value.trim();
+                const selectedFormat = formatSelect.value;
+                const selectedMode = document.querySelector('input[name="test-mode"]:checked').value;
+                
+                if (inputText === '') {
+                    outputField.textContent = '';
+                    outputField.className = 'result';
+                    return;
+                }
+                
+                try {
+                    let result;
+                    
+                    if (selectedMode === "encode") {
+                        switch (selectedFormat) {
+                            case "base64":
+                                result = base64Encode(inputText);
+                                break;
+                            case "base58":
+                                result = base58Encode(inputText);
+                                break;
+                        }
+                    } else {
+                        switch (selectedFormat) {
+                            case "base64":
+                                result = base64Decode(inputText);
+                                break;
+                            case "base58":
+                                result = base58Decode(inputText);
+                                break;
+                        }
+                    }
+                    
+                    outputField.textContent = result;
+                    outputField.className = 'result success';
+                } catch (error) {
+                    outputField.textContent = '錯誤: ' + error.message;
+                    outputField.className = 'result error';
+                }
+            });
+
+            // 初始化介面
+            updateInterface();
+        }
+
+        // 進制轉換功能
+        function setupBaseConversion() {
+            const fromBaseInput = document.getElementById('from-base');
+            const toBaseInput = document.getElementById('to-base');
+            const baseInput = document.getElementById('base-input');
+            const baseOutput = document.getElementById('base-output');
+            const convertButton = document.getElementById('base-convert');
+            const clearButton = document.getElementById('base-clear');
+
+            // 轉換函數
+            function convertBase() {
+                const fromBase = parseInt(fromBaseInput.value);
+                const toBase = parseInt(toBaseInput.value);
+                const inputValue = baseInput.value.trim();
+
+                if (!inputValue) {
+                    baseOutput.textContent = '請輸入要轉換的數值';
+                    baseOutput.className = 'result error';
+                    return;
+                }
+
+                if (isNaN(fromBase) || fromBase < 2 || fromBase > 36) {
+                    baseOutput.textContent = '來源進制必須在 2-36 之間';
+                    baseOutput.className = 'result error';
+                    return;
+                }
+
+                if (isNaN(toBase) || toBase < 2 || toBase > 36) {
+                    baseOutput.textContent = '目標進制必須在 2-36 之間';
+                    baseOutput.className = 'result error';
+                    return;
+                }
+
+                try {
+                    let result;
+                    
+                    // 檢查輸入是否為純數字進制轉換
+                    const isValidBaseNumber = /^[0-9a-zA-Z]+$/.test(inputValue);
+                    
+                    if (isValidBaseNumber) {
+                        // 純進制轉換模式
+                        result = baseConvert(inputValue, fromBase, toBase);
+                        
+                        baseOutput.innerHTML = `
+                            <strong>數字進制轉換：</strong><br>
+                            <strong>輸入:</strong> ${inputValue} (${fromBase}進制)<br>
+                            <strong>十進制值:</strong> ${parseInt(inputValue, fromBase)}<br>
+                            <strong>結果:</strong> ${result} (${toBase}進制)
+                        `;
+                    } else {
+                        // 文字模式：使用字符編碼
+                        let encodedValues = [];
+                        for (let i = 0; i < inputValue.length; i++) {
+                            const charCode = inputValue.charCodeAt(i);
+                            const converted = charCode.toString(toBase).toUpperCase();
+                            encodedValues.push(converted);
+                        }
+                        result = encodedValues.join('-');
+                        
+                        baseOutput.innerHTML = `
+                            <strong>文字進制轉換：</strong><br>
+                            <strong>輸入:</strong> "${inputValue}"<br>
+                            <strong>轉換方式:</strong> 字符編碼 → ${toBase}進制<br>
+                            <strong>結果:</strong> ${result}<br>
+                            <small>註：每個字符的Unicode編碼轉為${toBase}進制，用破折號分隔</small>
+                        `;
+                    }
+                    
+                    baseOutput.className = 'result success';
+                } catch (error) {
+                    baseOutput.textContent = `轉換錯誤: ${error.message}`;
+                    baseOutput.className = 'result error';
+                }
+            }
+
+            // 清除函數
+            function clearAll() {
+                baseInput.value = '';
+                baseOutput.textContent = '點擊轉換按鈕進行進制轉換';
+                baseOutput.className = 'result';
+                fromBaseInput.value = '10';
+                toBaseInput.value = '16';
+            }
+
+            // 事件監聽
+            convertButton.addEventListener('click', convertBase);
+            clearButton.addEventListener('click', clearAll);
+
+            // Enter 鍵支援
+            baseInput.addEventListener('keypress', function(event) {
+                if (event.key === 'Enter') {
+                    convertBase();
+                }
+            });
+
+            // 快速設置常用進制
+            fromBaseInput.addEventListener('change', function() {
+                const base = parseInt(this.value);
+                if (base === 2) baseInput.placeholder = '例如: 1010101';
+                else if (base === 8) baseInput.placeholder = '例如: 777';
+                else if (base === 10) baseInput.placeholder = '例如: 255';
+                else if (base === 16) baseInput.placeholder = '例如: FF';
+                else baseInput.placeholder = '輸入要轉換的數字或文字';
+            });
+        }
+
+        // 執行單一測試案例
+        function runSingleTest(input, description, mode = "encode", format = "base64") {
+            const results = {};
+            let hasError = false;
+
+            try {
+                if (mode === "encode") {
+                    results.base64 = base64Encode(input);
+                    results.base58 = base58Encode(input);
+                } else {
+                    // 解碼模式，只測試指定格式
+                    switch (format) {
+                        case "base64":
+                            results.decoded = base64Decode(input);
+                            break;
+                        case "base58":
+                            results.decoded = base58Decode(input);
+                            break;
+                    }
+                }
+            } catch (error) {
+                results.error = `錯誤: ${error.message}`;
+                hasError = true;
+            }
+
+            return { results, hasError, mode, format };
+        }
+
+        // 執行所有測試
+        function runAllTests() {
+            const resultsDiv = document.getElementById('test-results');
+            let html = '<h3>測試結果：</h3>';
+            let totalTests = 0;
+            let passedTests = 0;
+
+            testCases.forEach(testCase => {
+                const mode = testCase.mode || "encode";
+                const format = testCase.format || "base64";
+                const { results, hasError } = runSingleTest(testCase.input, testCase.expected, mode, format);
+                totalTests++;
+                
+                const status = hasError ? 'error' : 'success';
+                const statusText = hasError ? '❌ 失敗' : '✅ 通過';
+                
+                if (!hasError) passedTests++;
+
+                html += `
+                    <div class="test-case">
+                        <h4>${testCase.expected} (${mode === 'encode' ? '編碼' : '解碼'}) <span class="${status}">${statusText}</span></h4>
+                        <p><strong>輸入:</strong> "${testCase.input}"</p>
+                `;
+                
+                if (mode === "encode") {
+                    html += `
+                        <p><strong>Base64:</strong> ${results.base64}</p>
+                        <p><strong>Base58:</strong> ${results.base58}</p>
+                    `;
+                } else {
+                    html += `
+                        <p><strong>格式:</strong> ${format}</p>
+                        <p><strong>解碼結果:</strong> ${results.decoded || results.error}</p>
+                    `;
+                }
+                
+                html += `</div>`;
+            });
+
+            html += `
+                <div style="background: #e9ecef; padding: 15px; border-radius: 4px; margin-top: 20px;">
+                    <h3>測試總結</h3>
+                    <p><strong>總測試數:</strong> ${totalTests}</p>
+                    <p><strong>通過測試:</strong> ${passedTests}</p>
+                    <p><strong>失敗測試:</strong> ${totalTests - passedTests}</p>
+                    <p><strong>通過率:</strong> ${((passedTests / totalTests) * 100).toFixed(1)}%</p>
+                </div>
+            `;
+
+            resultsDiv.innerHTML = html;
+        }
+
+        // 填充比較表
+        function fillComparisonTable() {
+            const tbody = document.getElementById('comparison-tbody');
+            const sampleTexts = ['Hello', '你好', '測試', '123', 'A', 'Hello World', '🚀'];
+            
+            sampleTexts.forEach(text => {
+                const { results } = runSingleTest(text, '', 'encode');
+                const row = tbody.insertRow();
+                row.insertCell(0).textContent = text;
+                row.insertCell(1).textContent = results.base64;
+                row.insertCell(2).textContent = results.base58;
+            });
+        }
+
+        // 自訂測試功能
+        function setupCustomTest() {
+            document.getElementById('test-custom').addEventListener('click', function() {
+                const input = document.getElementById('custom-input').value;
+                const resultsDiv = document.getElementById('custom-results');
+                
+                // 測試編碼
+                const encodeResults = runSingleTest(input, '自訂編碼測試', 'encode');
+                
+                let html = `
+                    <div class="test-case">
+                        <h4>自訂測試結果</h4>
+                        <p><strong>輸入:</strong> "${input}"</p>
+                        <h5>編碼結果:</h5>
+                        <p><strong>Base64:</strong> ${encodeResults.results.base64}</p>
+                        <p><strong>Base58:</strong> ${encodeResults.results.base58}</p>
+                `;
+                
+                // 如果有編碼結果，嘗試解碼驗證
+                if (!encodeResults.hasError && encodeResults.results.base64) {
+                    try {
+                        const decodeTest64 = base64Decode(encodeResults.results.base64);
+                        const decodeTest58 = base58Decode(encodeResults.results.base58);
+                        
+                        html += `
+                            <h5>解碼驗證 (應該等於原始輸入):</h5>
+                            <p><strong>Base64 解碼:</strong> "${decodeTest64}" ${decodeTest64 === input ? '✅' : '❌'}</p>
+                            <p><strong>Base58 解碼:</strong> "${decodeTest58}" ${decodeTest58 === input ? '✅' : '❌'}</p>
+                        `;
+                    } catch (error) {
+                        html += `<p><strong>解碼驗證失敗:</strong> ${error.message}</p>`;
+                    }
+                }
+                
+                html += `</div>`;
+                resultsDiv.innerHTML = html;
+            });
+        }
+
+        // 初始化頁面
+        document.addEventListener('DOMContentLoaded', function() {
+            setupPopupSimulation();
+            setupBaseConversion();
+            setupCustomTest();
+            fillComparisonTable();
+            
+            document.getElementById('run-all-tests').addEventListener('click', runAllTests);
+            
+            console.log('Base Encoder 測試頁面已載入完成');
+            console.log('可用的編碼函數:', {
+                base64Encode: typeof base64Encode,
+                base58Encode: typeof base58Encode,
+                customBaseEncode: typeof customBaseEncode
+            });
+        });
+    </script>
+</body>
+</html>

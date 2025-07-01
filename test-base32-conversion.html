@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>測試 32 進制轉換</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test-case { background: #f0f0f0; padding: 15px; margin: 10px 0; border-radius: 5px; }
+        .result { font-weight: bold; color: #007cba; }
+        .error { color: red; }
+        .success { color: green; }
+    </style>
+</head>
+<body>
+    <h1>32 進制轉換測試</h1>
+    
+    <div class="test-case">
+        <h3>測試 1: "8k2n0" (32進制) → 10進制</h3>
+        <div id="test1-result"></div>
+    </div>
+    
+    <div class="test-case">
+        <h3>測試 2: 驗證 JavaScript parseInt 函數</h3>
+        <div id="test2-result"></div>
+    </div>
+    
+    <div class="test-case">
+        <h3>測試 3: 使用自訂函數</h3>
+        <div id="test3-result"></div>
+    </div>
+    
+    <script src="src/utils/encoders.js"></script>
+    <script>
+        // 測試 1: 直接使用 JavaScript parseInt
+        function test1() {
+            const input = "8k2n0";
+            const fromBase = 32;
+            
+            try {
+                const result = parseInt(input, fromBase);
+                const isCorrect = result === 14373468;
+                
+                document.getElementById('test1-result').innerHTML = `
+                    <div>輸入: "${input}" (${fromBase}進制)</div>
+                    <div>結果: <span class="result">${result}</span></div>
+                    <div>期望: 14373468</div>
+                    <div class="${isCorrect ? 'success' : 'error'}">
+                        ${isCorrect ? '✅ 正確' : '❌ 錯誤'}
+                    </div>
+                `;
+                
+                console.log('Test 1:', { input, result, expected: 14373468, correct: isCorrect });
+            } catch (error) {
+                document.getElementById('test1-result').innerHTML = `
+                    <div class="error">錯誤: ${error.message}</div>
+                `;
+            }
+        }
+        
+        // 測試 2: 手動計算驗證
+        function test2() {
+            const input = "8k2n0";
+            const base = 32;
+            
+            // 手動計算每一位
+            let result = 0;
+            let details = [];
+            
+            for (let i = input.length - 1; i >= 0; i--) {
+                const char = input[i].toLowerCase();
+                let digitValue;
+                
+                if (char >= '0' && char <= '9') {
+                    digitValue = char.charCodeAt(0) - '0'.charCodeAt(0);
+                } else if (char >= 'a' && char <= 'z') {
+                    digitValue = char.charCodeAt(0) - 'a'.charCodeAt(0) + 10;
+                }
+                
+                const position = input.length - 1 - i;
+                const placeValue = Math.pow(base, position);
+                const contribution = digitValue * placeValue;
+                
+                details.push(`${char} = ${digitValue} × ${base}^${position} = ${contribution}`);
+                result += contribution;
+            }
+            
+            const isCorrect = result === 14373468;
+            
+            document.getElementById('test2-result').innerHTML = `
+                <div>手動計算過程:</div>
+                ${details.map(d => `<div style="margin-left: 20px;">• ${d}</div>`).join('')}
+                <div>總和: <span class="result">${result}</span></div>
+                <div>期望: 14373468</div>
+                <div class="${isCorrect ? 'success' : 'error'}">
+                    ${isCorrect ? '✅ 正確' : '❌ 錯誤'}
+                </div>
+            `;
+            
+            console.log('Test 2:', { result, expected: 14373468, correct: isCorrect, details });
+        }
+        
+        // 測試 3: 使用自訂解碼函數
+        function test3() {
+            const input = "8k2n0";
+            const base = 32;
+            
+            try {
+                // 使用 customBaseDecode 函數（沒有破折號，應該是數字模式）
+                const result = customBaseDecode(input, base);
+                const resultNum = parseInt(result, 10);
+                const isCorrect = resultNum === 14373468;
+                
+                document.getElementById('test3-result').innerHTML = `
+                    <div>使用 customBaseDecode("${input}", ${base})</div>
+                    <div>結果: <span class="result">${result}</span></div>
+                    <div>轉為數字: ${resultNum}</div>
+                    <div>期望: 14373468</div>
+                    <div class="${isCorrect ? 'success' : 'error'}">
+                        ${isCorrect ? '✅ 正確' : '❌ 錯誤'}
+                    </div>
+                `;
+                
+                console.log('Test 3:', { input, result, resultNum, expected: 14373468, correct: isCorrect });
+            } catch (error) {
+                document.getElementById('test3-result').innerHTML = `
+                    <div class="error">錯誤: ${error.message}</div>
+                `;
+                console.error('Test 3 error:', error);
+            }
+        }
+        
+        // 執行所有測試
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('開始執行 32 進制轉換測試...');
+            test1();
+            test2();
+            test3();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="popup.css">
+    <title>編碼器</title>
+</head>
+<body>
+    <div class="container">
+        <h1>編碼/解碼器</h1>
+        
+        <!-- 功能選擇標籤 -->
+        <div class="tab-container">
+            <button class="tab-button active" id="encode-tab">編碼/解碼</button>
+            <button class="tab-button" id="convert-tab">進制轉換</button>
+        </div>
+        
+        <!-- 編碼/解碼區塊 -->
+        <div class="tab-content active" id="encode-section">
+            <div class="mode-selection">
+                <label>
+                    <input type="radio" name="mode" value="encode" checked>
+                    編碼
+                </label>
+                <label>
+                    <input type="radio" name="mode" value="decode">
+                    解碼
+                </label>
+            </div>
+            
+            <textarea id="input" placeholder="輸入要處理的內容"></textarea>
+            
+            <div class="format-selection">
+                <label>選擇格式:</label>
+                <select id="format">
+                    <option value="base64">Base64</option>
+                    <option value="base58">Base58</option>
+                </select>
+            </div>
+            
+            <div class="action-button">
+                <button id="process">處理</button>
+            </div>
+            
+            <h2>結果</h2>
+            <textarea id="output" placeholder="處理結果" readonly></textarea>
+        </div>
+        
+        <!-- 進制轉換區塊 -->
+        <div class="tab-content" id="convert-section">
+            <div class="convert-input-group">
+                <div class="base-input-row">
+                    <div class="base-input-half">
+                        <label>來源進制 (2-36):</label>
+                        <input type="number" id="fromBase" min="2" max="36" value="36" placeholder="來源進制">
+                    </div>
+                    <div class="base-input-half">
+                        <label>目標進制 (2-36):</label>
+                        <input type="number" id="toBase" min="2" max="36" value="10" placeholder="目標進制">
+                    </div>
+                </div>
+                
+                <label>輸入數字:</label>
+                <textarea id="convertInput" placeholder="輸入要轉換的數字" rows="3"></textarea>
+                
+                <div class="action-button">
+                    <button id="convertButton">轉換</button>
+                    <button id="clearButton" class="secondary">清除</button>
+                </div>
+            </div>
+            
+            <h2>轉換結果</h2>
+            <textarea id="convertOutput" placeholder="轉換結果" readonly></textarea>
+            
+            <div class="base-reference">
+                <small>
+                    <strong>進制參考:</strong> 
+                    2進制(0,1) | 8進制(0-7) | 10進制(0-9) | 16進制(0-9,A-F) | 36進制(0-9,A-Z)
+                </small>
+            </div>
+        </div>
+    </div>
+    <script src="../utils/encoders.js"></script>
+    <script src="popup.js"></script>
+</body>
+</html>

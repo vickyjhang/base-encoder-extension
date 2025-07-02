@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firefox Base Encoder 測試頁面</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        h1 {
+            color: #ff6611;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        h2 {
+            color: #333;
+            border-bottom: 2px solid #ff6611;
+            padding-bottom: 5px;
+        }
+        .test-section {
+            margin-bottom: 30px;
+        }
+        .test-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            border-left: 4px solid #ff6611;
+        }
+        .test-step {
+            margin-bottom: 10px;
+        }
+        .expected {
+            background: #e7f3ff;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            margin-top: 5px;
+        }
+        .note {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .success {
+            color: #28a745;
+            font-weight: bold;
+        }
+        .warning {
+            color: #dc3545;
+            font-weight: bold;
+        }
+        .firefox-specific {
+            background: #e8f4fd;
+            border-left: 4px solid #0066cc;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🦊 Firefox Base Encoder 擴充功能測試</h1>
+        
+        <div class="note">
+            <strong>📋 測試前準備：</strong>
+            <ol>
+                <li>確保已在 Firefox 中載入 Base Encoder 擴充功能</li>
+                <li>前往 <code>about:debugging</code> → This Firefox → Load Temporary Add-on</li>
+                <li>選擇 firefox-extension 資料夾中的 manifest.json</li>
+                <li>點擊工具列上的 Base Encoder 圖示開啟擴充功能</li>
+            </ol>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>🔧 基本功能測試</h2>
+        
+        <div class="test-section">
+            <h3>1. 擴充功能載入測試</h3>
+            <div class="test-item firefox-specific">
+                <div class="test-step">
+                    <strong>步驟：</strong> 檢查擴充功能是否正確載入
+                </div>
+                <div class="test-step">
+                    <strong>操作：</strong>
+                    <ul>
+                        <li>查看 Firefox 工具列是否出現 Base Encoder 圖示</li>
+                        <li>點擊圖示，檢查彈出視窗是否正常顯示</li>
+                        <li>檢查三個標籤頁（編碼/解碼、進制轉換、Unicode）是否可切換</li>
+                    </ul>
+                </div>
+                <div class="expected">
+                    <strong>預期結果：</strong> 擴充功能正常顯示，所有標籤頁可正常切換
+                </div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>2. Firefox WebExtensions API 測試</h3>
+            <div class="test-item firefox-specific">
+                <div class="test-step">
+                    <strong>步驟：</strong> 測試 Firefox 特有的 API 兼容性
+                </div>
+                <div class="test-step">
+                    <strong>操作：</strong>
+                    <ul>
+                        <li>在任一標籤頁輸入一些內容</li>
+                        <li>關閉擴充功能彈出視窗</li>
+                        <li>重新開啟擴充功能</li>
+                        <li>檢查剛才輸入的內容是否還在</li>
+                    </ul>
+                </div>
+                <div class="expected">
+                    <strong>預期結果：</strong> 使用 Firefox browser.storage API，資料能正確保存和恢復
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>📝 編碼/解碼功能測試</h2>
+        
+        <div class="test-section">
+            <h3>1. Base64 編碼測試</h3>
+            <div class="test-item">
+                <div class="test-step">
+                    <strong>步驟：</strong> 測試中英文 Base64 編碼
+                </div>
+                <div class="test-step">
+                    <strong>操作：</strong>
+                    <ol>
+                        <li>切換到「編碼/解碼」標籤</li>
+                        <li>選擇「編碼」模式</li>
+                        <li>格式選擇「Base64」</li>
+                        <li>測試以下輸入：</li>
+                    </ol>
+                </div>
+                <div class="expected">
+                    <strong>測試案例：</strong><br>
+                    輸入: "Hello Firefox" → 預期輸出: "SGVsbG8gRmlyZWZveA=="<br>
+                    輸入: "火狐瀏覽器" → 預期輸出: "54Gr54m556CW6Ka96Zmo"<br>
+                    輸入: "🦊🔥" → 預期輸出: "8J+mivCfkqU="
+                </div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>2. Base64 解碼測試</h3>
+            <div class="test-item">
+                <div class="test-step">
+                    <strong>操作：</strong>
+                    <ol>
+                        <li>選擇「解碼」模式</li>
+                        <li>格式選擇「Base64」</li>
+                        <li>測試以下輸入：</li>
+                    </ol>
+                </div>
+                <div class="expected">
+                    <strong>測試案例：</strong><br>
+                    輸入: "SGVsbG8gRmlyZWZveA==" → 預期輸出: "Hello Firefox"<br>
+                    輸入: "54Gr54m556CW6Ka96Zmo" → 預期輸出: "火狐瀏覽器"<br>
+                    輸入: "8J+mivCfkqU=" → 預期輸出: "🦊🔥"
+                </div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>3. Base58 編碼測試</h3>
+            <div class="test-item">
+                <div class="test-step">
+                    <strong>操作：</strong>
+                    <ol>
+                        <li>選擇「編碼」模式</li>
+                        <li>格式選擇「Base58」</li>
+                        <li>測試以下輸入：</li>
+                    </ol>
+                </div>
+                <div class="expected">
+                    <strong>測試案例：</strong><br>
+                    輸入: "Hello" → 預期輸出: "9Ajdvzr"<br>
+                    輸入: "Firefox" → 預期輸出: "3QJmnh9xLAT"<br>
+                    輸入: "123" → 預期輸出: "3yQ"
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>🔢 進制轉換功能測試</h2>
+        
+        <div class="test-section">
+            <h3>1. 常用進制轉換測試</h3>
+            <div class="test-item">
+                <div class="test-step">
+                    <strong>操作：</strong>
+                    <ol>
+                        <li>切換到「進制轉換」標籤</li>
+                        <li>測試以下轉換：</li>
+                    </ol>
+                </div>
+                <div class="expected">
+                    <strong>測試案例：</strong><br>
+                    十進制 → 二進制: 來源進制=10, 目標進制=2, 輸入=255 → 預期輸出="11111111"<br>
+                    二進制 → 十六進制: 來源進制=2, 目標進制=16, 輸入=11111111 → 預期輸出="FF"<br>
+                    十六進制 → 十進制: 來源進制=16, 目標進制=10, 輸入=FF → 預期輸出="255"
+                </div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>2. 特殊進制轉換測試</h3>
+            <div class="test-item">
+                <div class="test-step">
+                    <strong>操作：</strong> 測試較大進制轉換
+                </div>
+                <div class="expected">
+                    <strong>測試案例：</strong><br>
+                    36進制 → 10進制: 來源進制=36, 目標進制=10, 輸入=ZZ → 預期輸出="1295"<br>
+                    10進制 → 36進制: 來源進制=10, 目標進制=36, 輸入=1295 → 預期輸出="ZZ"
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>🌐 Unicode 功能測試</h2>
+        
+        <div class="test-section">
+            <h3>1. Unicode 編碼測試</h3>
+            <div class="test-item">
+                <div class="test-step">
+                    <strong>操作：</strong>
+                    <ol>
+                        <li>切換到「Unicode」標籤</li>
+                        <li>選擇「編碼」模式</li>
+                        <li>測試以下輸入：</li>
+                    </ol>
+                </div>
+                <div class="expected">
+                    <strong>測試案例：</strong><br>
+                    輸入: "火狐" → 預期輸出: "\\u706B\\u72D0"<br>
+                    輸入: "🦊" → 預期輸出: "\\uD83E\\uDD8A"<br>
+                    輸入: "Hello" → 預期輸出: "\\u0048\\u0065\\u006C\\u006C\\u006F"
+                </div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>2. Unicode 解碼測試</h3>
+            <div class="test-item">
+                <div class="test-step">
+                    <strong>操作：</strong>
+                    <ol>
+                        <li>選擇「解碼」模式</li>
+                        <li>測試以下輸入：</li>
+                    </ol>
+                </div>
+                <div class="expected">
+                    <strong>測試案例：</strong><br>
+                    輸入: "\\u706B\\u72D0" → 預期輸出: "火狐"<br>
+                    輸入: "\\uD83E\\uDD8A" → 預期輸出: "🦊"<br>
+                    輸入: "U+0048 U+0065 U+006C U+006C U+006F" → 預期輸出: "Hello"
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>💾 數據持久化測試</h2>
+        
+        <div class="test-section firefox-specific">
+            <h3>Firefox WebExtensions Storage 測試</h3>
+            <div class="test-item">
+                <div class="test-step">
+                    <strong>步驟：</strong> 測試 Firefox browser.storage API
+                </div>
+                <div class="test-step">
+                    <strong>操作：</strong>
+                    <ol>
+                        <li>在每個標籤頁分別輸入不同內容</li>
+                        <li>切換不同的模式設定</li>
+                        <li>完全關閉 Firefox</li>
+                        <li>重新開啟 Firefox</li>
+                        <li>重新載入擴充功能</li>
+                        <li>檢查所有內容和設定是否恢復</li>
+                    </ol>
+                </div>
+                <div class="expected">
+                    <strong>預期結果：</strong> 所有輸入內容、模式選擇、活動標籤頁都應該正確恢復
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>🔍 錯誤處理測試</h2>
+        
+        <div class="test-section">
+            <h3>1. 無效輸入測試</h3>
+            <div class="test-item">
+                <div class="test-step">
+                    <strong>操作：</strong> 測試各種錯誤輸入
+                </div>
+                <div class="expected">
+                    <strong>測試案例：</strong><br>
+                    • Base64 解碼無效字符：輸入 "invalidbase64@#$" → 應顯示錯誤訊息<br>
+                    • 進制轉換無效輸入：二進制輸入 "123" → 應顯示錯誤訊息<br>
+                    • 進制範圍錯誤：來源進制輸入 "1" 或 "37" → 應顯示錯誤訊息<br>
+                    • Unicode 解碼無效格式：輸入 "\\uXXXX" → 應顯示錯誤訊息
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>🎨 介面功能測試</h2>
+        
+        <div class="test-section">
+            <h3>1. 複製功能測試</h3>
+            <div class="test-item">
+                <div class="test-step">
+                    <strong>操作：</strong>
+                    <ol>
+                        <li>在任何輸出欄位產生結果</li>
+                        <li>點擊輸出欄位</li>
+                        <li>檢查是否顯示「已複製到剪貼簿！」</li>
+                        <li>在其他地方貼上驗證</li>
+                    </ol>
+                </div>
+                <div class="expected">
+                    <strong>預期結果：</strong> 內容正確複製到剪貼簿
+                </div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>2. 清除功能測試</h3>
+            <div class="test-item">
+                <div class="test-step">
+                    <strong>操作：</strong>
+                    <ol>
+                        <li>在進制轉換標籤輸入內容</li>
+                        <li>點擊「清除」按鈕</li>
+                        <li>在 Unicode 標籤輸入內容</li>
+                        <li>點擊「清除」按鈕</li>
+                    </ol>
+                </div>
+                <div class="expected">
+                    <strong>預期結果：</strong> 所有輸入和輸出欄位都被清空
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>📊 測試結果記錄</h2>
+        
+        <div class="note">
+            <strong>✅ 測試檢查清單：</strong>
+            <ul>
+                <li>☐ 擴充功能載入正常</li>
+                <li>☐ Firefox WebExtensions API 兼容</li>
+                <li>☐ Base64 編碼/解碼功能正常</li>
+                <li>☐ Base58 編碼/解碼功能正常</li>
+                <li>☐ 進制轉換功能正常</li>
+                <li>☐ Unicode 編碼/解碼功能正常</li>
+                <li>☐ 數據持久化功能正常</li>
+                <li>☐ 錯誤處理正確</li>
+                <li>☐ 複製功能正常</li>
+                <li>☐ 清除功能正常</li>
+                <li>☐ 標籤頁切換正常</li>
+                <li>☐ 介面顯示正常</li>
+            </ul>
+        </div>
+
+        <div class="test-item firefox-specific">
+            <strong>🦊 Firefox 特有測試項目：</strong>
+            <ul>
+                <li>☐ browser.storage API 正常運作</li>
+                <li>☐ Manifest V2 格式正確</li>
+                <li>☐ browser_action 配置正確</li>
+                <li>☐ applications.gecko 設定正確</li>
+                <li>☐ 權限設定正確</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>🚀 發佈前檢查</h2>
+        
+        <div class="note">
+            <strong>📋 Firefox Add-ons 發佈檢查：</strong>
+            <ol>
+                <li>☐ 所有功能測試通過</li>
+                <li>☐ XPI 檔案建構成功</li>
+                <li>☐ 在全新 Firefox 安裝中測試</li>
+                <li>☐ 檢查 manifest.json 格式</li>
+                <li>☐ 確認圖示檔案完整</li>
+                <li>☐ 準備應用程式描述</li>
+                <li>☐ 準備截圖素材</li>
+                <li>☐ 確認隱私權政策</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        // 添加動態測試結果記錄功能
+        document.addEventListener('DOMContentLoaded', function() {
+            const checkboxes = document.querySelectorAll('li:has(☐)');
+            checkboxes.forEach(item => {
+                item.style.cursor = 'pointer';
+                item.addEventListener('click', function() {
+                    if (this.textContent.includes('☐')) {
+                        this.innerHTML = this.innerHTML.replace('☐', '✅');
+                        this.style.color = '#28a745';
+                    } else if (this.textContent.includes('✅')) {
+                        this.innerHTML = this.innerHTML.replace('✅', '☐');
+                        this.style.color = '';
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

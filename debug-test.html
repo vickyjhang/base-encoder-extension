@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Debug Test</title>
+</head>
+<body>
+    <h1>Debug Test</h1>
+    <button onclick="testFunctions()">測試函數</button>
+    <div id="result"></div>
+
+    <script src="src/utils/encoders.js"></script>
+    <script>
+        function testFunctions() {
+            const result = document.getElementById('result');
+            try {
+                // 測試 base64 函數
+                const base64Result = base64Encode('Hello');
+                result.innerHTML += `<p>base64Encode('Hello'): ${base64Result}</p>`;
+
+                const base64DecodeResult = base64Decode(base64Result);
+                result.innerHTML += `<p>base64Decode result: ${base64DecodeResult}</p>`;
+
+                // 測試 base58 函數
+                const base58Result = base58Encode('Hello');
+                result.innerHTML += `<p>base58Encode('Hello'): ${base58Result}</p>`;
+
+                const base58DecodeResult = base58Decode(base58Result);
+                result.innerHTML += `<p>base58Decode result: ${base58DecodeResult}</p>`;
+
+                result.innerHTML += `<p style="color: green;">所有函數正常工作！</p>`;
+            } catch (error) {
+                result.innerHTML += `<p style="color: red;">錯誤: ${error.message}</p>`;
+                console.error('Error:', error);
+            }
+        }
+
+        // 檢查函數是否已定義
+        document.addEventListener('DOMContentLoaded', function() {
+            const result = document.getElementById('result');
+            result.innerHTML += `<p>base64Encode 是否已定義: ${typeof base64Encode}</p>`;
+            result.innerHTML += `<p>base64Decode 是否已定義: ${typeof base64Decode}</p>`;
+            result.innerHTML += `<p>base58Encode 是否已定義: ${typeof base58Encode}</p>`;
+            result.innerHTML += `<p>base58Decode 是否已定義: ${typeof base58Decode}</p>`;
+        });
+    </script>
+</body>
+</html>

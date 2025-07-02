@@ -1,0 +1,37 @@
+{
+  "manifest_version": 2,
+  "name": "Base Encoder",
+  "version": "1.2",
+  "description": "多功能編碼/解碼工具，支援 Base64/Base58 編碼解碼、進制轉換 (2-36)、Unicode 編碼解碼，並具備數據持久化功能。",
+  
+  "permissions": [
+    "storage"
+  ],
+  
+  "browser_action": {
+    "default_popup": "src/popup/popup.html",
+    "default_title": "Base Encoder",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png", 
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "base-encoder-tool-2025@vicky.dev",
+      "strict_min_version": "109.0"
+    }
+  },
+  
+  "content_security_policy": "script-src 'self'; object-src 'self'"
+}

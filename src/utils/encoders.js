@@ -1,8 +1,10 @@
+// Base64 編碼函數
 function base64Encode(input) {
   // 先將字串轉換為 UTF-8 編碼，然後進行 Base64 編碼
   return btoa(unescape(encodeURIComponent(input)));
 }
 
+// Base64 解碼函數
 function base64Decode(input) {
   // 先進行 Base64 解碼，然後將 UTF-8 編碼轉換回字串
   try {
@@ -12,259 +14,202 @@ function base64Decode(input) {
   }
 }
 
+// Base58 編碼函數
 function base58Encode(input) {
   const alphabet = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
-  let num = BigInt(0);
 
+  // 將輸入字符串轉換為字節數組
+  const bytes = [];
   for (let i = 0; i < input.length; i++) {
-    num = num * BigInt(256) + BigInt(input.charCodeAt(i));
+    const code = input.codePointAt(i);
+    if (code <= 0x7F) {
+      bytes.push(code);
+    } else if (code <= 0x7FF) {
+      bytes.push(0xC0 | (code >> 6));
+      bytes.push(0x80 | (code & 0x3F));
+    } else if (code <= 0xFFFF) {
+      bytes.push(0xE0 | (code >> 12));
+      bytes.push(0x80 | ((code >> 6) & 0x3F));
+      bytes.push(0x80 | (code & 0x3F));
+    } else {
+      bytes.push(0xF0 | (code >> 18));
+      bytes.push(0x80 | ((code >> 12) & 0x3F));
+      bytes.push(0x80 | ((code >> 6) & 0x3F));
+      bytes.push(0x80 | (code & 0x3F));
+      i++; // 跳過下一個字符（高代理）
+    }
   }
 
+  // 轉換為大整數
+  let num = BigInt(0);
+  for (let i = 0; i < bytes.length; i++) {
+    num = num * BigInt(256) + BigInt(bytes[i]);
+  }
+
+  // 如果輸入為空，返回空字符串
+  if (num === BigInt(0) && bytes.length === 0) {
+    return "";
+  }
+
+  // 編碼
   let encoded = "";
   while (num > 0) {
-    encoded = alphabet[num % BigInt(58)] + encoded;
-    num /= BigInt(58);
+    encoded = alphabet[Number(num % BigInt(58))] + encoded;
+    num = num / BigInt(58);
   }
 
-  for (let i = 0; i < input.length && input[i] === "\0"; i++) {
+  // 處理前導零字節
+  for (let i = 0; i < bytes.length && bytes[i] === 0; i++) {
     encoded = alphabet[0] + encoded;
   }
 
-  return encoded;
+  return encoded || alphabet[0];
 }
 
+// Base58 解碼函數
 function base58Decode(input) {
   const alphabet = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
+
+  if (!input || input.length === 0) {
+    return "";
+  }
+
+  // 檢查字符是否有效
+  for (let i = 0; i < input.length; i++) {
+    if (alphabet.indexOf(input[i]) === -1) {
+      throw new Error(`無效的 Base58 字符: ${input[i]}`);
+    }
+  }
+
+  // 轉換為大整數
   let num = BigInt(0);
-
   for (let i = 0; i < input.length; i++) {
-    num = num * BigInt(58) + BigInt(alphabet.indexOf(input[i]));
+    const index = alphabet.indexOf(input[i]);
+    if (index === -1) {
+      throw new Error("無效的 Base58 字串");
+    }
+    num = num * BigInt(58) + BigInt(index);
   }
 
-  let decoded = "";
+  // 轉換為字節數組
+  const bytes = [];
   while (num > 0) {
-    decoded = String.fromCharCode(Number(num % BigInt(256))) + decoded;
-    num /= BigInt(256);
+    bytes.unshift(Number(num % BigInt(256)));
+    num = num / BigInt(256);
   }
 
-  return decoded;
-}
-
-function customBaseEncode(input, base) {
-  // 檢查進制範圍
-  if (base < 2 || base > 36) {
-    throw new Error("進制必須在 2 到 36 之間");
+  // 處理前導 '1' 字符
+  for (let i = 0; i < input.length && input[i] === alphabet[0]; i++) {
+    bytes.unshift(0);
   }
 
-  // 檢查輸入是否為純數字
-  const isNumeric = /^\d+$/.test(input.trim());
-
-  if (isNumeric) {
-    // 純數字模式：將十進制數字轉換為指定進制
-    const decimal = parseInt(input, 10);
-    if (isNaN(decimal)) {
-      throw new Error("無效的數字");
-    }
-    return decimal.toString(base).toUpperCase();
-  } else {
-    // 文字模式：將每個字符轉換為其字符碼，然後轉換為指定進制
-    let result = "";
-    for (let i = 0; i < input.length; i++) {
-      const charCode = input.charCodeAt(i);
-      const encoded = charCode.toString(base).toUpperCase();
-      result += encoded;
-      if (i < input.length - 1) {
-        result += "-"; // 使用破折號分隔避免混淆
-      }
-    }
-    return result;
-  }
-}
-
-function customBaseDecode(input, base) {
-  // 檢查進制範圍
-  if (base < 2 || base > 36) {
-    throw new Error("進制必須在 2 到 36 之間");
-  }
-
-  try {
-    // 檢查是否包含破折號（文字模式）
-    if (input.includes("-")) {
-      // 文字模式：按破折號分割，然後將每個部分從指定進制轉換回字符
-      const parts = input.split("-");
-      let result = "";
-
-      for (let part of parts) {
-        if (part) {
-          const charCode = parseInt(part, base);
-          if (isNaN(charCode)) {
-            throw new Error(`無效的 Base${base} 字串`);
-          }
-          result += String.fromCharCode(charCode);
-        }
-      }
-      return result;
-    } else {
-      // 純數字模式：將指定進制的數字轉換為十進制
-      const decimal = parseInt(input, base);
-      if (isNaN(decimal)) {
-        throw new Error(`無效的 Base${base} 字串`);
-      }
-      return decimal.toString(10);
-    }
-  } catch (error) {
-    throw new Error(`無效的 Base${base} 字串: ${error.message}`);
-  }
-}
-
-// 新增：純進制轉換函數
-function baseConvert(input, fromBase, toBase) {
-  // 檢查進制範圍
-  if (fromBase < 2 || fromBase > 36 || toBase < 2 || toBase > 36) {
-    throw new Error("進制必須在 2 到 36 之間");
-  }
-
-  try {
-    // 先轉換為十進制
-    const decimal = parseInt(input, fromBase);
-    if (isNaN(decimal)) {
-      throw new Error(`"${input}" 不是有效的 ${fromBase} 進制數字`);
-    }
-
-    // 再轉換為目標進制
-    return decimal.toString(toBase).toUpperCase();
-  } catch (error) {
-    throw new Error(`進制轉換錯誤: ${error.message}`);
-  }
-}
-
-// 新增：Unicode 編碼函數
-function unicodeEncode(input) {
+  // 將字節數組轉換為 UTF-8 字符串
   let result = "";
-  for (let i = 0; i < input.length; i++) {
-    const codePoint = input.codePointAt(i);
-    if (codePoint > 0xffff) {
-      // 處理超過 BMP 的字符（如 emoji）
-      result +=
-        "\\u" + ("000" + ((codePoint - 0x10000) >> 10) + 0xd800).slice(-4);
-      result +=
-        "\\u" + ("000" + ((codePoint - 0x10000) & 0x3ff) + 0xdc00).slice(-4);
-      i++; // 跳過下一個字符，因為這是一個代理對
+  let i = 0;
+  while (i < bytes.length) {
+    const byte1 = bytes[i];
+
+    if (byte1 < 0x80) {
+      // 單字節字符
+      result += String.fromCharCode(byte1);
+      i++;
+    } else if ((byte1 & 0xE0) === 0xC0) {
+      // 雙字節字符
+      if (i + 1 >= bytes.length) break;
+      const byte2 = bytes[i + 1];
+      const codePoint = ((byte1 & 0x1F) << 6) | (byte2 & 0x3F);
+      result += String.fromCharCode(codePoint);
+      i += 2;
+    } else if ((byte1 & 0xF0) === 0xE0) {
+      // 三字節字符
+      if (i + 2 >= bytes.length) break;
+      const byte2 = bytes[i + 1];
+      const byte3 = bytes[i + 2];
+      const codePoint = ((byte1 & 0x0F) << 12) | ((byte2 & 0x3F) << 6) | (byte3 & 0x3F);
+      result += String.fromCharCode(codePoint);
+      i += 3;
+    } else if ((byte1 & 0xF8) === 0xF0) {
+      // 四字節字符
+      if (i + 3 >= bytes.length) break;
+      const byte2 = bytes[i + 1];
+      const byte3 = bytes[i + 2];
+      const byte4 = bytes[i + 3];
+      const codePoint = ((byte1 & 0x07) << 18) | ((byte2 & 0x3F) << 12) | ((byte3 & 0x3F) << 6) | (byte4 & 0x3F);
+      result += String.fromCodePoint(codePoint);
+      i += 4;
     } else {
-      result += "\\u" + ("000" + codePoint.toString(16)).slice(-4);
+      // 無效字節，跳過
+      i++;
     }
   }
+
   return result;
 }
 
-// 新增：Unicode 解碼函數
-function unicodeDecode(input) {
-  try {
-    // 移除可能的額外空格
-    input = input.trim();
-
-    // 處理不同格式的 Unicode 編碼
-    let processedInput = input;
-
-    // 處理 &#x 格式 (如 &#x71df;)
-    processedInput = processedInput.replace(
-      /&#x([0-9a-fA-F]+);/g,
-      (match, hex) => {
-        return String.fromCharCode(parseInt(hex, 16));
-      }
-    );
-
-    // 處理 &# 格式 (如 &#29151;)
-    processedInput = processedInput.replace(/&#(\d+);/g, (match, decimal) => {
-      return String.fromCharCode(parseInt(decimal, 10));
-    });
-
-    // 處理 \u 格式 (如 \u71df)
-    processedInput = processedInput.replace(
-      /\\u([0-9a-fA-F]{4})/g,
-      (match, hex) => {
-        return String.fromCharCode(parseInt(hex, 16));
-      }
-    );
-
-    // 處理 \U 格式 (如 \U000071df)
-    processedInput = processedInput.replace(
-      /\\U([0-9a-fA-F]{8})/g,
-      (match, hex) => {
-        const codePoint = parseInt(hex, 16);
-        return String.fromCodePoint(codePoint);
-      }
-    );
-
-    // 處理 U+ 格式 (如 U+71df)
-    processedInput = processedInput.replace(
-      /U\+([0-9a-fA-F]+)/g,
-      (match, hex) => {
-        const codePoint = parseInt(hex, 16);
-        return String.fromCodePoint(codePoint);
-      }
-    );
-
-    return processedInput;
-  } catch (error) {
-    throw new Error("無效的 Unicode 編碼格式");
+// 進制轉換函數
+function convertBase(value, fromBase, toBase) {
+  // 驗證進制範圍
+  if (fromBase < 2 || fromBase > 36 || toBase < 2 || toBase > 36) {
+    throw new Error("進制必須在 2-36 之間");
   }
-}
 
-// 新增：將文字轉換為不同格式的 Unicode 編碼
-function unicodeEncodeFormat(input, format = "backslash") {
-  let result = "";
+  // 移除空白字符
+  value = value.trim().toUpperCase();
 
-  for (let i = 0; i < input.length; i++) {
-    const codePoint = input.codePointAt(i);
+  if (!value) {
+    return "";
+  }
 
-    switch (format) {
-      case "backslash": // \u格式
-        if (codePoint > 0xffff) {
-          // 處理代理對
-          const high = Math.floor((codePoint - 0x10000) / 0x400) + 0xd800;
-          const low = ((codePoint - 0x10000) % 0x400) + 0xdc00;
-          result += "\\u" + high.toString(16).padStart(4, "0");
-          result += "\\u" + low.toString(16).padStart(4, "0");
-          i++; // 跳過低代理
-        } else {
-          result += "\\u" + codePoint.toString(16).padStart(4, "0");
-        }
-        break;
-
-      case "html_hex": // &#x格式
-        result += "&#x" + codePoint.toString(16) + ";";
-        if (codePoint > 0xffff) i++; // 跳過低代理
-        break;
-
-      case "html_decimal": // &#格式
-        result += "&#" + codePoint + ";";
-        if (codePoint > 0xffff) i++; // 跳過低代理
-        break;
-
-      case "u_plus": // U+格式
-        result +=
-          "U+" + codePoint.toString(16).toUpperCase().padStart(4, "0") + " ";
-        if (codePoint > 0xffff) i++; // 跳過低代理
-        break;
-
-      default:
-        result += "\\u" + codePoint.toString(16).padStart(4, "0");
-        if (codePoint > 0xffff) i++; // 跳過低代理
+  // 驗證輸入字符是否符合來源進制
+  const validChars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ".substring(0, fromBase);
+  for (let i = 0; i < value.length; i++) {
+    if (validChars.indexOf(value[i]) === -1) {
+      throw new Error(`字符 '${value[i]}' 不符合 ${fromBase} 進制`);
     }
   }
 
-  return result.trim();
+  // 轉換為十進制
+  let decimal = BigInt(0);
+  for (let i = 0; i < value.length; i++) {
+    const digit = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ".indexOf(value[i]);
+    decimal = decimal * BigInt(fromBase) + BigInt(digit);
+  }
+
+  // 如果目標是十進制，直接返回
+  if (toBase === 10) {
+    return decimal.toString();
+  }
+
+  // 轉換為目標進制
+  if (decimal === BigInt(0)) {
+    return "0";
+  }
+
+  const digits = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  let result = "";
+
+  while (decimal > 0) {
+    result = digits[Number(decimal % BigInt(toBase))] + result;
+    decimal = decimal / BigInt(toBase);
+  }
+
+  return result;
 }
 
-// 將函數暴露到全域作用域以供 popup.js 使用
-window.base64Encode = base64Encode;
-window.base64Decode = base64Decode;
-window.base58Encode = base58Encode;
-window.base58Decode = base58Decode;
-window.customBaseEncode = customBaseEncode;
-window.customBaseDecode = customBaseDecode;
-window.baseConvert = baseConvert;
-window.unicodeEncode = unicodeEncode;
-window.unicodeDecode = unicodeDecode;
-window.unicodeEncodeFormat = unicodeEncodeFormat;
+// Unicode 編碼函數
+function unicodeEncode(input) {
+  return input.split('').map(char => {
+    const code = char.codePointAt(0);
+    return `\\u${code.toString(16).padStart(4, '0').toUpperCase()}`;
+  }).join('');
+}
+
+// Unicode 解碼函數
+function unicodeDecode(input) {
+  // 支援多種 Unicode 格式
+  return input
+    .replace(/\\u([0-9a-fA-F]{4})/g, (match, hex) => String.fromCharCode(parseInt(hex, 16)))
+    .replace(/U\+([0-9a-fA-F]+)/g, (match, hex) => String.fromCodePoint(parseInt(hex, 16)))
+    .replace(/&#(\d+);/g, (match, dec) => String.fromCharCode(parseInt(dec, 10)))
+    .replace(/&#x([0-9a-fA-F]+);/g, (match, hex) => String.fromCharCode(parseInt(hex, 16)));
+}

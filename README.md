@@ -1,6 +1,21 @@
 # Base Encoder Extension
 
-A Chrome browser extension that provides comprehensive encoding and decoding functionality using Base64, Base58, and custom base (2-36) encoding schemes with full Unicode support and data persistence.
+一個全功能的瀏覽器擴充功能，提供 Base64、Base58 編碼解碼和進制轉換功能，支援完整 Unicode 字符和數據持久化。
+
+**🌟 現在支援 Chrome 和 Firefox！**
+
+## 🚀 跨瀏覽器支援
+
+### Chrome 版本
+- 使用 Manifest V3
+- Chrome Extensions API
+- 位於 `src/` 資料夾
+
+### Firefox 版本  
+- 使用 Manifest V2
+- Firefox WebExtensions API
+- 位於 `firefox-extension/` 資料夾
+- 完全兼容 Chrome 版本的所有功能
 
 ## Features
 
@@ -38,11 +53,30 @@ All encoding formats support the complete Unicode character set:
 
 ## Installation
 
+### Chrome 版本安裝
+
 1. Download or clone this repository
 2. Open Chrome and navigate to `chrome://extensions/`
 3. Enable "Developer mode" in the top right corner
-4. Click "Load unpacked" and select the `base-encoder-extension` directory
+4. Click "Load unpacked" and select the `src/` directory
 5. The extension icon will appear in the toolbar
+
+### Firefox 版本安裝
+
+1. 開啟 Firefox 並前往 `about:debugging`
+2. 點擊「This Firefox」
+3. 點擊「Load Temporary Add-on...」
+4. 選擇 `firefox-extension/manifest.json` 檔案
+5. 或者安裝建構好的 XPI 檔案：
+   ```bash
+   cd firefox-extension
+   ./build-firefox.sh
+   # 安裝 release/base-encoder-firefox-v1.2.xpi
+   ```
+
+詳細安裝說明請參考：
+- Chrome: 專案根目錄的文檔
+- Firefox: `firefox-extension/INSTALL_GUIDE.md`
 
 ## Usage
 

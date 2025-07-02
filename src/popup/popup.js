@@ -2,8 +2,10 @@ document.addEventListener("DOMContentLoaded", function () {
   // 標籤頁元素
   const encodeTab = document.getElementById("encode-tab");
   const convertTab = document.getElementById("convert-tab");
+  const unicodeTab = document.getElementById("unicode-tab");
   const encodeSection = document.getElementById("encode-section");
   const convertSection = document.getElementById("convert-section");
+  const unicodeSection = document.getElementById("unicode-section");
 
   // 編碼/解碼區塊元素
   const inputField = document.getElementById("input");
@@ -19,6 +21,17 @@ document.addEventListener("DOMContentLoaded", function () {
   const convertOutput = document.getElementById("convertOutput");
   const convertButton = document.getElementById("convertButton");
   const clearButton = document.getElementById("clearButton");
+
+  // Unicode 區塊元素
+  const unicodeInput = document.getElementById("unicodeInput");
+  const unicodeOutput = document.getElementById("unicodeOutput");
+  const unicodeProcessButton = document.getElementById("unicodeProcess");
+  const unicodeClearButton = document.getElementById("unicodeClear");
+  const unicodeModeRadios = document.querySelectorAll(
+    'input[name="unicode-mode"]'
+  );
+  const unicodeInputLabel = document.getElementById("unicode-input-label");
+  const unicodeOutputTitle = document.getElementById("unicode-output-title");
 
   // === 數據持久化功能 ===
 
@@ -36,6 +49,12 @@ document.addEventListener("DOMContentLoaded", function () {
       toBase: toBaseInput.value,
       convertInput: convertInput.value,
       convertOutput: convertOutput.value,
+
+      // Unicode 區塊
+      unicodeInput: unicodeInput.value,
+      unicodeOutput: unicodeOutput.value,
+      unicodeMode: document.querySelector('input[name="unicode-mode"]:checked')
+        .value,
 
       // UI 狀態
       activeTab: document.querySelector(".tab-button.active").id,
@@ -101,6 +120,16 @@ document.addEventListener("DOMContentLoaded", function () {
       if (data.convertInput) convertInput.value = data.convertInput;
       if (data.convertOutput) convertOutput.value = data.convertOutput;
 
+      // 恢復 Unicode 區塊
+      if (data.unicodeInput) unicodeInput.value = data.unicodeInput;
+      if (data.unicodeOutput) unicodeOutput.value = data.unicodeOutput;
+      if (data.unicodeMode) {
+        const unicodeModeRadio = document.querySelector(
+          `input[name="unicode-mode"][value="${data.unicodeMode}"]`
+        );
+        if (unicodeModeRadio) unicodeModeRadio.checked = true;
+      }
+
       // 恢復活動標籤頁
       if (data.activeTab) {
         const activeTab = document.getElementById(data.activeTab);
@@ -109,6 +138,8 @@ document.addEventListener("DOMContentLoaded", function () {
             switchTab(encodeTab, encodeSection);
           } else if (data.activeTab === "convert-tab") {
             switchTab(convertTab, convertSection);
+          } else if (data.activeTab === "unicode-tab") {
+            switchTab(unicodeTab, unicodeSection);
           }
         }
       }
@@ -116,6 +147,7 @@ document.addEventListener("DOMContentLoaded", function () {
       // 更新對應的 placeholder
       updatePlaceholderFromBase();
       updateEncodeInterface();
+      updateUnicodeInterface();
     } catch (error) {
       console.log("恢復數據時出錯:", error);
     }
@@ -145,6 +177,9 @@ document.addEventListener("DOMContentLoaded", function () {
   );
   convertTab.addEventListener("click", () =>
     switchTab(convertTab, convertSection)
+  );
+  unicodeTab.addEventListener("click", () =>
+    switchTab(unicodeTab, unicodeSection)
   );
 
   // === 編碼/解碼功能 ===
@@ -319,6 +354,87 @@ document.addEventListener("DOMContentLoaded", function () {
   toBaseInput.addEventListener("change", saveData);
   convertInput.addEventListener("input", saveData);
 
+  // === Unicode 編碼/解碼功能 ===
+
+  // 更新 Unicode 介面文字
+  function updateUnicodeInterface() {
+    const selectedMode = document.querySelector(
+      'input[name="unicode-mode"]:checked'
+    ).value;
+    const isDecode = selectedMode === "decode";
+
+    unicodeProcessButton.textContent = isDecode ? "解碼" : "編碼";
+    unicodeInputLabel.textContent = isDecode
+      ? "Unicode 編碼輸入:"
+      : "文字輸入:";
+    unicodeOutputTitle.textContent = isDecode ? "解碼結果" : "編碼結果";
+    unicodeInput.placeholder = isDecode
+      ? "輸入 Unicode 編碼，例如：\\u71df\\u904b\\u7e3e\\u6548\\u7ba1\\u7406"
+      : "輸入文字，例如：營運績效管理";
+    unicodeOutput.placeholder = isDecode ? "解碼後的文字" : "Unicode 編碼結果";
+  }
+
+  // 監聽 Unicode 模式變更
+  unicodeModeRadios.forEach((radio) => {
+    radio.addEventListener("change", function () {
+      updateUnicodeInterface();
+      saveData(); // 儲存狀態
+    });
+  });
+
+  // 監聽 Unicode 輸入欄位變更
+  unicodeInput.addEventListener("input", saveData);
+
+  // Unicode 編碼/解碼處理
+  unicodeProcessButton.addEventListener("click", function () {
+    const inputText = unicodeInput.value.trim();
+    const selectedMode = document.querySelector(
+      'input[name="unicode-mode"]:checked'
+    ).value;
+
+    if (inputText === "") {
+      unicodeOutput.value = "";
+      unicodeOutput.className = "";
+      return;
+    }
+
+    try {
+      let result;
+
+      if (selectedMode === "encode") {
+        // 編碼模式：文字 → Unicode
+        result = unicodeEncode(inputText);
+      } else {
+        // 解碼模式：Unicode → 文字
+        result = unicodeDecode(inputText);
+      }
+
+      unicodeOutput.value = result;
+      unicodeOutput.className = "success";
+      saveData(); // 儲存結果
+    } catch (error) {
+      unicodeOutput.value = `錯誤: ${error.message}`;
+      unicodeOutput.className = "error";
+      saveData(); // 儲存錯誤狀態
+    }
+  });
+
+  // Unicode 清除功能
+  unicodeClearButton.addEventListener("click", function () {
+    unicodeInput.value = "";
+    unicodeOutput.value = "";
+    unicodeOutput.className = "";
+    saveData(); // 儲存清除後的狀態
+  });
+
+  // Unicode 區塊 Enter 鍵支援
+  unicodeInput.addEventListener("keypress", function (event) {
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault();
+      unicodeProcessButton.click();
+    }
+  });
+
   // 初始化功能
   function initialize() {
     // 先載入儲存的數據
@@ -326,6 +442,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // 初始化介面
     updateEncodeInterface();
+    updateUnicodeInterface();
 
     // 設定初始提示文字
     updatePlaceholderFromBase();

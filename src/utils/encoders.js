@@ -138,6 +138,125 @@ function baseConvert(input, fromBase, toBase) {
   }
 }
 
+// 新增：Unicode 編碼函數
+function unicodeEncode(input) {
+  let result = "";
+  for (let i = 0; i < input.length; i++) {
+    const codePoint = input.codePointAt(i);
+    if (codePoint > 0xffff) {
+      // 處理超過 BMP 的字符（如 emoji）
+      result +=
+        "\\u" + ("000" + ((codePoint - 0x10000) >> 10) + 0xd800).slice(-4);
+      result +=
+        "\\u" + ("000" + ((codePoint - 0x10000) & 0x3ff) + 0xdc00).slice(-4);
+      i++; // 跳過下一個字符，因為這是一個代理對
+    } else {
+      result += "\\u" + ("000" + codePoint.toString(16)).slice(-4);
+    }
+  }
+  return result;
+}
+
+// 新增：Unicode 解碼函數
+function unicodeDecode(input) {
+  try {
+    // 移除可能的額外空格
+    input = input.trim();
+
+    // 處理不同格式的 Unicode 編碼
+    let processedInput = input;
+
+    // 處理 &#x 格式 (如 &#x71df;)
+    processedInput = processedInput.replace(
+      /&#x([0-9a-fA-F]+);/g,
+      (match, hex) => {
+        return String.fromCharCode(parseInt(hex, 16));
+      }
+    );
+
+    // 處理 &# 格式 (如 &#29151;)
+    processedInput = processedInput.replace(/&#(\d+);/g, (match, decimal) => {
+      return String.fromCharCode(parseInt(decimal, 10));
+    });
+
+    // 處理 \u 格式 (如 \u71df)
+    processedInput = processedInput.replace(
+      /\\u([0-9a-fA-F]{4})/g,
+      (match, hex) => {
+        return String.fromCharCode(parseInt(hex, 16));
+      }
+    );
+
+    // 處理 \U 格式 (如 \U000071df)
+    processedInput = processedInput.replace(
+      /\\U([0-9a-fA-F]{8})/g,
+      (match, hex) => {
+        const codePoint = parseInt(hex, 16);
+        return String.fromCodePoint(codePoint);
+      }
+    );
+
+    // 處理 U+ 格式 (如 U+71df)
+    processedInput = processedInput.replace(
+      /U\+([0-9a-fA-F]+)/g,
+      (match, hex) => {
+        const codePoint = parseInt(hex, 16);
+        return String.fromCodePoint(codePoint);
+      }
+    );
+
+    return processedInput;
+  } catch (error) {
+    throw new Error("無效的 Unicode 編碼格式");
+  }
+}
+
+// 新增：將文字轉換為不同格式的 Unicode 編碼
+function unicodeEncodeFormat(input, format = "backslash") {
+  let result = "";
+
+  for (let i = 0; i < input.length; i++) {
+    const codePoint = input.codePointAt(i);
+
+    switch (format) {
+      case "backslash": // \u格式
+        if (codePoint > 0xffff) {
+          // 處理代理對
+          const high = Math.floor((codePoint - 0x10000) / 0x400) + 0xd800;
+          const low = ((codePoint - 0x10000) % 0x400) + 0xdc00;
+          result += "\\u" + high.toString(16).padStart(4, "0");
+          result += "\\u" + low.toString(16).padStart(4, "0");
+          i++; // 跳過低代理
+        } else {
+          result += "\\u" + codePoint.toString(16).padStart(4, "0");
+        }
+        break;
+
+      case "html_hex": // &#x格式
+        result += "&#x" + codePoint.toString(16) + ";";
+        if (codePoint > 0xffff) i++; // 跳過低代理
+        break;
+
+      case "html_decimal": // &#格式
+        result += "&#" + codePoint + ";";
+        if (codePoint > 0xffff) i++; // 跳過低代理
+        break;
+
+      case "u_plus": // U+格式
+        result +=
+          "U+" + codePoint.toString(16).toUpperCase().padStart(4, "0") + " ";
+        if (codePoint > 0xffff) i++; // 跳過低代理
+        break;
+
+      default:
+        result += "\\u" + codePoint.toString(16).padStart(4, "0");
+        if (codePoint > 0xffff) i++; // 跳過低代理
+    }
+  }
+
+  return result.trim();
+}
+
 // 將函數暴露到全域作用域以供 popup.js 使用
 window.base64Encode = base64Encode;
 window.base64Decode = base64Decode;
@@ -146,3 +265,6 @@ window.base58Decode = base58Decode;
 window.customBaseEncode = customBaseEncode;
 window.customBaseDecode = customBaseDecode;
 window.baseConvert = baseConvert;
+window.unicodeEncode = unicodeEncode;
+window.unicodeDecode = unicodeDecode;
+window.unicodeEncodeFormat = unicodeEncodeFormat;

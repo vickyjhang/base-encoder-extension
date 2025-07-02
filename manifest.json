@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "Base Encoder",
-  "version": "1.1",
-  "description": "Chrome extension for Base64/Base58 encoding/decoding and base conversion (2-36) with Unicode support and data persistence.",
+  "version": "1.2",
+  "description": "多功能編碼/解碼工具，支援 Base64/Base58 編碼解碼、進制轉換 (2-36)、Unicode 編碼解碼，並具備數據持久化功能。",
   "permissions": [
     "storage"
   ],
